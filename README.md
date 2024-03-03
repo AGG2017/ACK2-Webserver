@@ -6,7 +6,7 @@ The result file `webserver/webserver.zip` can be used as a package for the optio
 
 This version of the webserver was done based on the great work from these two projects:
 
-[WEBFS](http://bytesex.org/webfs.html) - well optimized web server for static web pages and files.
+[WEBFS](https://linux.bytesex.org/misc/webfs.html) - well optimized web server for static web pages and files.
 
 [MUSL](https://musl.libc.org) - well optimized static library that eliminate the need of using shared libraries (with all other functions in them not used by the caller).
 
