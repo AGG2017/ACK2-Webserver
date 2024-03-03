@@ -45,12 +45,13 @@ struct v_buffer
         size_t length;
 };
 
-static char *v_dev_name;
+static char v_dev_name[32];
 static enum v_io_method v_io = IO_METHOD_MMAP;
 static int v_fd = -1;
 struct v_buffer *v_buffers;
 static unsigned int n_buffers = 0;
 static int v_force_format = 0;
+static int v_last_working_video_source = -1;
 
 // ------------------------- memory manager ------------------------
 
@@ -754,30 +755,57 @@ static void usage(FILE *fp, int argc, char **argv)
 int v_capture_image(const char *v_filename, int v_frame_count)
 {
         int result = 0;
-        v_dev_name = "/dev/video0";
-        mem_manager_begin();
-        if (v_open_device() >= 0)
+        int i, beg, end;
+        if (v_last_working_video_source >= 0)
         {
-                if (v_init_device() >= 0)
+                // good video source is already available
+                beg = v_last_working_video_source;
+                end = v_last_working_video_source;
+        }
+        else
+        {
+                // try to find another video source
+                beg = 0;
+                end = 9;
+        }
+        for (i = beg; i <= end; i++)
+        {
+                sprintf(v_dev_name, "/dev/video%d", i);
+                mem_manager_begin();
+                if (v_open_device() >= 0)
                 {
-                        if (v_start_capturing() >= 0)
+                        if (v_init_device() >= 0)
                         {
-                                if (v_mainloop(v_filename, v_frame_count) >= 0)
+                                if (v_start_capturing() >= 0)
                                 {
-                                        if (v_stop_capturing() >= 0)
+                                        if (v_mainloop(v_filename, v_frame_count) >= 0)
                                         {
-                                                if (v_uninit_device() >= 0)
+                                                if (v_stop_capturing() >= 0)
                                                 {
-                                                        if (v_close_device() >= 0)
+                                                        if (v_uninit_device() >= 0)
                                                         {
-                                                                result = 1;
+                                                                if (v_close_device() >= 0)
+                                                                {
+                                                                        result = 1;
+                                                                }
                                                         }
                                                 }
                                         }
                                 }
                         }
                 }
+                mem_manager_end();
+                if (result)
+                {
+                        // found a video source with no errors
+                        v_last_working_video_source = i;
+                        break;
+                }
         }
-        mem_manager_end();
+        if (!result)
+        {
+                // missing a good video source, set mode searching for the next call
+                v_last_working_video_source = -1;
+        }
         return result;
 }
