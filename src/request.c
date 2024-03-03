@@ -412,6 +412,7 @@ int detect_printer_defaults(const char **printer_model, const char **cfg_filenam
 	}
 }
 
+#define MIN_SUPPORTED_GRID_SIZE 2
 #define MAX_SUPPORTED_GRID_SIZE 10
 #define BYTES_PER_GRID_ELEMENT 10
 #define MESH_BUFFER_SIZE (MAX_SUPPORTED_GRID_SIZE * MAX_SUPPORTED_GRID_SIZE * BYTES_PER_GRID_ELEMENT)
@@ -442,6 +443,8 @@ double mesh_values[MESH_MATRIX_ELEMENTS];
 double mesh_average[MESH_MATRIX_ELEMENTS];
 // selected average precision from the config file
 double precision = 0.01;
+// set Z-offset in the printer*.cfg file
+double z_offset = 0.0;
 
 // clear the buffer for mesh from config
 void mesh_config_clear(void)
@@ -733,6 +736,7 @@ int read_mesh_from_printer_config(void)
 		probe_count_y = 0;
 		x_count = 0;
 		y_count = 0;
+		z_offset = 0.0;
 
 		// read the file line by line
 		file = fopen(k2_cfg, "r");
@@ -783,6 +787,11 @@ int read_mesh_from_printer_config(void)
 								 b[5] == 'n' && b[6] == 't' && b[7] == ' ' && b[8] == ':' && b[9] == ' ')
 				{
 					sscanf(&b[10], "%d", &y_count);
+				}
+				else if (b[0] == 'z' && b[1] == '_' && b[2] == 'o' && b[3] == 'f' && b[4] == 'f' &&
+								 b[5] == 's' && b[6] == 'e' && b[7] == 't' && b[8] == ' ' && b[9] == ':' && b[10] == ' ')
+				{
+					z_offset = atof(&b[11]);
 				}
 			}
 			fclose(file);
@@ -861,6 +870,12 @@ char *leveling_template_callback(char key)
 	{
 		// precision
 		sprintf(static_template_buffer, "%g", precision);
+		return static_template_buffer;
+	}
+	if (key == 'Z')
+	{
+		// Z-offset
+		sprintf(static_template_buffer, "%+g", z_offset);
 		return static_template_buffer;
 	}
 	if (key == 'B')
@@ -1199,7 +1214,7 @@ void process_custom_pages(char *filename_str, char *query_str)
 		{
 			// set the average
 			read_mesh_from_printer_config();
-			if ((mesh_grid >= 2) && (mesh_grid <= 12))
+			if ((mesh_grid >= MIN_SUPPORTED_GRID_SIZE) && (mesh_grid <= MAX_SUPPORTED_GRID_SIZE))
 			{
 				const char *config_file;
 				detect_printer_defaults(NULL, &config_file, NULL);
@@ -1230,7 +1245,7 @@ void process_custom_pages(char *filename_str, char *query_str)
 			char *grid = get_key_value(query, "grid", grid_default);
 			int grid_int = atoi(grid);
 
-			if ((grid_int >= 2) && (grid_int < 13) && (precision_float >= 0.0001) && (precision_float <= 0.1))
+			if ((grid_int >= MIN_SUPPORTED_GRID_SIZE) && (grid_int <= MAX_SUPPORTED_GRID_SIZE) && (precision_float >= 0.0001) && (precision_float <= 0.1))
 			{
 				if (precision_float != precision)
 				{

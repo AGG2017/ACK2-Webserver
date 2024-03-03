@@ -20,7 +20,7 @@
 <form action="index.html" method="get" name="save_mesh" >
   <fieldset>
   <span><legend><b>SAVE THE CURRENT MESH IN A DATA SLOT:</b><legend></span>
-  <span>Next Free Data Slot: </span><input type="number" name="selected_slot" size="3" value="{C}" min="0" max="99" />
+  <span>Next Free Data Slot (0-99): </span><input type="number" name="selected_slot" size="3" value="{C}" min="0" max="99" />
   <input type="hidden" name="action" value="save_mesh">
   <input type="submit" value="SAVE CURRENT MESH">
   </fieldset>
@@ -28,7 +28,7 @@
 <form action="../mesh/index.html" method="get" name="slot3d" >
 <fieldset>
 <span><legend><b>3D VISUALIZATION OF SELECTED DATA SLOT:</b><legend></span>
-<span>Select Data Slot: </span><input type="number" name="source" size="3" value="" min="1" max="99" />	
+<span>Select Data Slot (1-99): </span><input type="number" name="source" size="3" value="" min="1" max="99" />	
 <input type="submit" value="3D VISUALIZATION">
 </fieldset>
 </form>
@@ -64,7 +64,7 @@
 </form>
 <form action="../mesh/index.html" method="get" name="config" >
 <fieldset>
-<p>Current Mesh Data:</p>
+<p>Current Mesh Data (Z-offset = {Z} mm):</p>
 <textarea style="font-family: monospace; overflow: auto; width:100%;" cols="200" rows="5" wrap="off">{E}</textarea>
 <input type="hidden" name="source" value="config">                                                                  
 <input type="submit" value="3D VISUALIZATION">                                                                       
