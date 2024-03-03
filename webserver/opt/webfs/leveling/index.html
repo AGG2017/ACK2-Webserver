@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>LEVELING TOOLS</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>		
+<body style="background-color:rgb(240, 213, 233);" onunload="">
+<center><p style="color: red; padding: 0 10px;">{#}</p></center>
+<center><h2>LEVELING TOOLS</h2></center>
+<form action="index.html" method="get" name="set_parameters" >
+  <fieldset>
+  <span><legend><b>SELECT PARAMETERS:</b><legend></span>
+  <span>Average Precision: </span><input type="number" name="precision" size="7" value="{A}" step="0.0001" min="0.0001" max="0.1" />
+  <span>Grid Size (2-10): </span><input type="number" name="grid" size="3" value="{B}" min="2" max="10" />
+  <input type="hidden" name="action" value="set_parameters">
+  <input type="submit" value="UPDATE">
+  <span><legend>Note: Changing the 'Grid Size' requires to clear all data slots and to reboot the printer!<legend></span>
+  </fieldset>
+</form>
+<form action="index.html" method="get" name="save_mesh" >
+  <fieldset>
+  <span><legend><b>SAVE THE CURRENT MESH IN A DATA SLOT:</b><legend></span>
+  <span>Next Free Data Slot: </span><input type="number" name="selected_slot" size="3" value="{C}" min="0" max="99" />
+  <input type="hidden" name="action" value="save_mesh">
+  <input type="submit" value="SAVE CURRENT MESH">
+  </fieldset>
+</form>
+<form action="../mesh/index.html" method="get" name="slot3d" >
+<fieldset>
+<span><legend><b>3D VISUALIZATION OF SELECTED DATA SLOT:</b><legend></span>
+<span>Select Data Slot: </span><input type="number" name="source" size="3" value="" min="1" max="99" />	
+<input type="submit" value="3D VISUALIZATION">
+</fieldset>
+</form>
+<form action="index.html" method="get" name="set_average" >
+  <fieldset>
+  <span><legend><b>SET THE AVERAGE MESH AS CURRENT MESH:</b><legend></span>
+  <input type="hidden" name="action" value="set_average">
+  <input type="submit" value="SET THE AVERAGE MESH">
+  <span><legend>Note: Setting a new mesh requires to reboot the printer!<legend></span>
+  </fieldset>
+</form>
+<form action="index.html" method="get" name="clear_slot" >
+  <fieldset>
+  <span><legend><b>CLEAR SELECTED LEVELING DATA SLOT:</b><legend></span>
+  <span>Data Slot (1-99): </span><input type="number" name="data_slot" size="3" value="{D}" min="1" max="99" />
+  <input type="hidden" name="action" value="clear_slot">
+  <input type="submit" value="CLEAR THIS SLOT">
+  </fieldset>
+</form>
+<form action="index.html" method="get" name="clear_all" >
+  <fieldset>
+  <span><legend><b>CLEAR ALL LEVELING DATA SLOTS:</b><legend></span>
+  <input type="hidden" name="action" value="clear_all">
+  <input type="submit" value="CLEAR ALL SLOTS">
+  </fieldset>
+</form>
+<form action="index.html" method="get" name="reboot" >
+  <fieldset>
+  <span><legend><b>REBOOT THE PRINTER:</b><legend></span>
+  <input type="hidden" name="action" value="reboot">
+  <input type="submit" value="REBOOT">
+  </fieldset>
+</form>
+<form action="../mesh/index.html" method="get" name="config" >
+<fieldset>
+<p>Current Mesh Data:</p>
+<textarea style="font-family: monospace; overflow: auto; width:100%;" cols="200" rows="5" wrap="off">{E}</textarea>
+<input type="hidden" name="source" value="config">                                                                  
+<input type="submit" value="3D VISUALIZATION">                                                                       
+</fieldset>
+</form> 
+<form action="../mesh/index.html" method="get" name="average" >
+<fieldset>
+<p>Average Mesh Data:</p>
+<textarea style="font-family: monospace; overflow: auto; width:100%;" cols="200" rows="5" wrap="off">{F}</textarea>
+<input type="hidden" name="source" value="average">
+<input type="submit" value="3D VISUALIZATION">
+</fieldset>
+</form>
+<a href="/index.html">HOME</a>
+</body>
+</html>

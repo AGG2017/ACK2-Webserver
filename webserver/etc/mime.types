@@ -1,0 +1,57 @@
+###############################################################################
+#
+#  Media (MIME) types and the extensions that represent them.
+#
+#  The format of this file is a media type on the left and zero or more
+#  filename extensions on the right.  Programs using this file will map
+#  files ending with those extensions to the associated type.
+#
+#  This file is part of the "media-types" package.  Please report a bug using
+#  the "reportbug" command of the "reportbug" package if you would like new
+#  types or extensions to be added.
+#
+#  The reason that all types are managed by the media-types package instead
+#  allowing individual packages to install types in much the same way as they
+#  add entries in to the mailcap file is so these types can be referenced by
+#  other programs (such as a web server) even if the specific support package
+#  for that type is not installed.
+#
+#  Users can add their own types if they wish by creating a ".mime.types"
+#  file in their home directory.  Definitions included there will take
+#  precedence over those listed here.
+#
+###############################################################################
+text/css                                                        css
+text/csv                                                        csv
+text/html                                                       html htm shtml
+text/plain                                                      asc txt text pot brf srt
+text/javascript                                                 es js mjs
+text/x-c++hdr                                                   h++ hpp hxx hh
+text/x-c++src                                                   c++ cpp cxx cc
+text/x-chdr                                                     h
+text/x-csh                                                      csh
+text/x-csrc                                                     c
+text/x-java                                                     java
+text/x-pascal                                                   p pas
+text/x-perl                                                     pl pm
+text/x-python                                                   py
+text/x-sh                                                       sh
+text/x-tcl                                                      tcl tk
+application/json                                                json
+application/octet-stream                                        bin
+application/pdf                                                 pdf
+application/x-7z-compressed                                     7z
+application/x-tar                                               tar
+application/x-xz                                                xz
+application/zip                                                 zip
+font/collection                                                 ttc
+font/otf                                                        otf
+font/ttf                                                        ttf
+font/woff                                                       woff
+font/woff2                                                      woff2
+image/bmp                                                       bmp
+image/gif                                                       gif
+image/jpeg                                                      jpeg jpg jpe jfif
+image/png                                                       png
+image/tiff                                                      tiff tif
+image/svg+xml                                                   svg svgz
