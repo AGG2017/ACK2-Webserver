@@ -29,8 +29,6 @@ typedef int32_t S32;
 typedef uint64_t U64;
 typedef int64_t S64;
 
-#define MAX_DATA_SLOTS 100
-
 const BYTE GRID[] = {
 		0,
 		1,
@@ -412,9 +410,10 @@ int detect_printer_defaults(const char **printer_model, const char **cfg_filenam
 	}
 }
 
+#define MAX_DATA_SLOTS 100
 #define MIN_SUPPORTED_GRID_SIZE 2
 #define MAX_SUPPORTED_GRID_SIZE 10
-#define BYTES_PER_GRID_ELEMENT 10
+#define BYTES_PER_GRID_ELEMENT 12
 #define MESH_BUFFER_SIZE (MAX_SUPPORTED_GRID_SIZE * MAX_SUPPORTED_GRID_SIZE * BYTES_PER_GRID_ELEMENT)
 #define MESH_MATRIX_ELEMENTS (MAX_SUPPORTED_GRID_SIZE * MAX_SUPPORTED_GRID_SIZE)
 
@@ -896,6 +895,13 @@ char *leveling_template_callback(char key)
 		// next free slot
 		int next_free = next_free_data_slot();
 		sprintf(static_template_buffer, "%d", next_free);
+		return static_template_buffer;
+	}
+	if (key == 'X')
+	{
+		// the number of slots to average
+		calculate_mesh_average(mesh_grid);
+		sprintf(static_template_buffer, "%d", mesh_accumulations);
 		return static_template_buffer;
 	}
 	if (key == 'D')
