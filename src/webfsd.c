@@ -725,6 +725,10 @@ int main(int argc, char *argv[])
 	char serv[16];
 	char mypid[12];
 
+	// verify if the copy of the doc root exists
+	// if not create it
+	create_root_doc_if_required();
+
 	uid = getuid();
 	euid = geteuid();
 	if (uid != euid)
@@ -1008,10 +1012,6 @@ int main(int argc, char *argv[])
 		write(pid, mypid, strlen(mypid));
 		close(pid);
 	}
-
-	// verify if the copy of the doc root exists
-	// if not create it
-	create_root_doc_if_required();
 
 	/* setup signal handler */
 	memset(&act, 0, sizeof(act));

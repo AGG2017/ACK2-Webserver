@@ -7,7 +7,7 @@
 <body style="background-color:rgb(240, 213, 233);" onunload="">
 <center><p style="color: red; padding: 0 10px;">{#}</p></center>
 <center><h2>LEVELING TOOLS</h2></center>
-<form action="index.html" method="get" name="set_parameters" >
+<form action="response.html" method="get" name="set_parameters" >
   <fieldset>
   <span><b>SELECT PARAMETERS:</b></span></span></span>
   <span>Average Precision: </span><input type="number" name="precision" size="7" value="{A}" step="0.0001" min="0.0001" max="0.1" />
@@ -17,7 +17,7 @@
   <span>Note: Changing the 'Grid Size' requires to clear all data slots and to reboot the printer!</span>
   </fieldset>
 </form>
-<form action="index.html" method="get" name="save_mesh" >
+<form action="response.html" method="get" name="save_mesh" >
   <fieldset>
   <span><b>SAVE THE CURRENT MESH IN A DATA SLOT:</b></span>
   <span>Next Free Data Slot (0-99): </span><input type="number" name="selected_slot" size="3" value="{C}" min="0" max="99" />
@@ -32,7 +32,7 @@
 <input type="submit" value="3D VISUALIZATION">
 </fieldset>
 </form>
-<form action="index.html" method="get" name="set_average" >
+<form action="response.html" method="get" name="set_average" >
   <fieldset>
   <span><b>SET THE AVERAGE MESH AS CURRENT MESH:</b></span>
   <input type="hidden" name="action" value="set_average">
@@ -40,7 +40,7 @@
   <span>Note: Setting a new mesh requires to reboot the printer!</span>
   </fieldset>
 </form>
-<form action="index.html" method="get" name="clear_slot" >
+<form action="response.html" method="get" name="clear_slot" >
   <fieldset>
   <span><b>CLEAR SELECTED LEVELING DATA SLOT:</b></span>
   <span>Data Slot (1-99): </span><input type="number" name="data_slot" size="3" value="{D}" min="1" max="99" />
@@ -48,14 +48,14 @@
   <input type="submit" value="CLEAR THIS SLOT">
   </fieldset>
 </form>
-<form action="index.html" method="get" name="clear_all" >
+<form action="response.html" method="get" name="clear_all" >
   <fieldset>
   <span><b>CLEAR ALL LEVELING DATA SLOTS:</b></span>
   <input type="hidden" name="action" value="clear_all">
   <input type="submit" value="CLEAR ALL SLOTS">
   </fieldset>
 </form>
-<form action="index.html" method="get" name="reboot" >
+<form action="response.html" method="get" name="reboot" >
   <fieldset>
   <span><b>REBOOT THE PRINTER:</b></span>
   <input type="hidden" name="action" value="reboot">
