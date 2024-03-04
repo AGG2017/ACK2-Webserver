@@ -9,17 +9,17 @@
 <center><h2>LEVELING TOOLS</h2></center>
 <form action="index.html" method="get" name="set_parameters" >
   <fieldset>
-  <span><legend><b>SELECT PARAMETERS:</b><legend></span>
+  <span><b>SELECT PARAMETERS:</b></span></span></span>
   <span>Average Precision: </span><input type="number" name="precision" size="7" value="{A}" step="0.0001" min="0.0001" max="0.1" />
   <span>Grid Size (2-10): </span><input type="number" name="grid" size="3" value="{B}" min="2" max="10" />
   <input type="hidden" name="action" value="set_parameters">
   <input type="submit" value="UPDATE">
-  <span><legend>Note: Changing the 'Grid Size' requires to clear all data slots and to reboot the printer!<legend></span>
+  <span>Note: Changing the 'Grid Size' requires to clear all data slots and to reboot the printer!</span>
   </fieldset>
 </form>
 <form action="index.html" method="get" name="save_mesh" >
   <fieldset>
-  <span><legend><b>SAVE THE CURRENT MESH IN A DATA SLOT:</b><legend></span>
+  <span><b>SAVE THE CURRENT MESH IN A DATA SLOT:</b></span>
   <span>Next Free Data Slot (0-99): </span><input type="number" name="selected_slot" size="3" value="{C}" min="0" max="99" />
   <input type="hidden" name="action" value="save_mesh">
   <input type="submit" value="SAVE CURRENT MESH">
@@ -27,22 +27,22 @@
 </form>
 <form action="../mesh/index.html" method="get" name="slot3d" >
 <fieldset>
-<span><legend><b>3D VISUALIZATION OF SELECTED DATA SLOT:</b><legend></span>
+<span><b>3D VISUALIZATION OF SELECTED DATA SLOT:</b></span>
 <span>Select Data Slot (1-99): </span><input type="number" name="source" size="3" value="" min="1" max="99" />	
 <input type="submit" value="3D VISUALIZATION">
 </fieldset>
 </form>
 <form action="index.html" method="get" name="set_average" >
   <fieldset>
-  <span><legend><b>SET THE AVERAGE MESH AS CURRENT MESH:</b><legend></span>
+  <span><b>SET THE AVERAGE MESH AS CURRENT MESH:</b></span>
   <input type="hidden" name="action" value="set_average">
   <input type="submit" value="SET THE AVERAGE MESH">
-  <span><legend>Note: Setting a new mesh requires to reboot the printer!<legend></span>
+  <span>Note: Setting a new mesh requires to reboot the printer!</span>
   </fieldset>
 </form>
 <form action="index.html" method="get" name="clear_slot" >
   <fieldset>
-  <span><legend><b>CLEAR SELECTED LEVELING DATA SLOT:</b><legend></span>
+  <span><b>CLEAR SELECTED LEVELING DATA SLOT:</b></span>
   <span>Data Slot (1-99): </span><input type="number" name="data_slot" size="3" value="{D}" min="1" max="99" />
   <input type="hidden" name="action" value="clear_slot">
   <input type="submit" value="CLEAR THIS SLOT">
@@ -50,14 +50,14 @@
 </form>
 <form action="index.html" method="get" name="clear_all" >
   <fieldset>
-  <span><legend><b>CLEAR ALL LEVELING DATA SLOTS:</b><legend></span>
+  <span><b>CLEAR ALL LEVELING DATA SLOTS:</b></span>
   <input type="hidden" name="action" value="clear_all">
   <input type="submit" value="CLEAR ALL SLOTS">
   </fieldset>
 </form>
 <form action="index.html" method="get" name="reboot" >
   <fieldset>
-  <span><legend><b>REBOOT THE PRINTER:</b><legend></span>
+  <span><b>REBOOT THE PRINTER:</b></span>
   <input type="hidden" name="action" value="reboot">
   <input type="submit" value="REBOOT">
   </fieldset>

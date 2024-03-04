@@ -413,9 +413,9 @@ int detect_printer_defaults(const char **printer_model, const char **cfg_filenam
 #define MAX_DATA_SLOTS 100
 #define MIN_SUPPORTED_GRID_SIZE 2
 #define MAX_SUPPORTED_GRID_SIZE 10
-#define BYTES_PER_GRID_ELEMENT 12
-#define MESH_BUFFER_SIZE (MAX_SUPPORTED_GRID_SIZE * MAX_SUPPORTED_GRID_SIZE * BYTES_PER_GRID_ELEMENT)
-#define MESH_MATRIX_ELEMENTS (MAX_SUPPORTED_GRID_SIZE * MAX_SUPPORTED_GRID_SIZE)
+#define BYTES_PER_GRID_ELEMENT 15
+#define MESH_BUFFER_SIZE (MAX_SUPPORTED_GRID_SIZE * MAX_SUPPORTED_GRID_SIZE * BYTES_PER_GRID_ELEMENT + 1)
+#define MESH_MATRIX_ELEMENTS (MAX_SUPPORTED_GRID_SIZE * MAX_SUPPORTED_GRID_SIZE + 1)
 
 // keep the last used mesh in format printer*.cfg
 char mesh_config[MESH_BUFFER_SIZE];
@@ -805,9 +805,49 @@ char static_template_buffer[1024];
 char *static_template_ptr;
 config_option_t leveling_config = NULL;
 int error_code;
+int response_code;
 
 char *leveling_template_callback(char key)
 {
+	// response code replacement
+	if (key == '@')
+	{
+		if (response_code == 1)
+		{
+			static_template_ptr = "SUCCESS: The printer is preparing to reboot now...";
+			return static_template_ptr;
+		}
+		if (response_code == 2)
+		{
+			static_template_ptr = "SUCCESS: All data slots have been cleared!";
+			return static_template_ptr;
+		}
+		if (response_code == 3)
+		{
+			static_template_ptr = "SUCCESS: Selected data slot has been cleared!";
+			return static_template_ptr;
+		}
+		if (response_code == 4)
+		{
+			static_template_ptr = "SUCCESS: Current mesh has been saved in the selected data slot!";
+			return static_template_ptr;
+		}
+		if (response_code == 5)
+		{
+			static_template_ptr = "SUCCESS: Calculated mesh average was set. Please reboot the printer to activate it!";
+			return static_template_ptr;
+		}
+		if (response_code == 6)
+		{
+			static_template_ptr = "SUCCESS: Selected new arithmetic precision has been set!";
+			return static_template_ptr;
+		}
+
+		// default - no response shown
+		static_template_buffer[0] = 0;
+		return static_template_buffer;
+	}
+	// error code replacement
 	if (key == '#')
 	{
 		if (error_code == 1)
@@ -837,7 +877,7 @@ char *leveling_template_callback(char key)
 		}
 		if (error_code == 6)
 		{
-			static_template_ptr = "WARNING: The grid size has changed! Please clear all data slots, reboot and then level the bed.";
+			static_template_ptr = "WARNING: The grid size has changed! Please reboot the printer and then level the bed.";
 			return static_template_ptr;
 		}
 		if (error_code == 7)
@@ -850,24 +890,52 @@ char *leveling_template_callback(char key)
 			static_template_ptr = "ERROR: The average cannot be used with all data slot cleared. Please save current mesh in a data slot first!";
 			return static_template_ptr;
 		}
+		if (error_code == 9)
+		{
+			static_template_ptr = "ERROR: Selected data slot is out of the supported range!";
+			return static_template_ptr;
+		}
+		if (error_code == 10)
+		{
+			static_template_ptr = "ERROR: Unsupported grid size!";
+			return static_template_ptr;
+		}
+		if (error_code == 11)
+		{
+			static_template_ptr = "ERROR: Unsupported arithmetic precision!";
+			return static_template_ptr;
+		}
+		if (error_code == 12)
+		{
+			static_template_ptr = "WARNING: No change detected in the requested parameters. These values are already set!";
+			return static_template_ptr;
+		}
+		if (error_code == 99)
+		{
+			static_template_ptr = "ERROR: Unsupported function requested!";
+			return static_template_ptr;
+		}
 		// default - no error shown
 		static_template_buffer[0] = 0;
 		return static_template_buffer;
 	}
 	if (key == 'E')
 	{
-		// ---current mesh---
+		// ---current mesh data---
 		return mesh_matrix;
 	}
 	if (key == 'F')
 	{
-		// ---average mesh---
+		// ---average mesh data---
+		apply_precision(mesh_average, precision);
 		mesh_matrix_export(mesh_average, mesh_grid);
 		return mesh_matrix;
 	}
 	if (key == 'A')
 	{
 		// precision
+		char *precision_str = get_key_value(leveling_config, "precision", "0.01");
+		double precision = atof(precision_str);
 		sprintf(static_template_buffer, "%g", precision);
 		return static_template_buffer;
 	}
@@ -910,6 +978,7 @@ char *leveling_template_callback(char key)
 		static_template_buffer[0] = 0;
 		return static_template_buffer;
 	}
+	// default - empty string
 	static_template_buffer[0] = 0;
 	return static_template_buffer;
 }
@@ -1162,21 +1231,71 @@ void process_custom_pages(char *filename_str, char *query_str)
 		}
 		rename("/mnt/UDISK/webfs/webcam/cam.tmp", "/mnt/UDISK/webfs/webcam/cam.jpg");
 	}
+
 	// ----------------------------- access to the leveling tools index.html -----------------------------
 	if ((!strcmp(filename_str, "/mnt/UDISK/webfs/leveling/index.html")))
 	{
+		response_code = 0;
+		error_code = 0;
 
-		if ((error_code != 6) && (error_code != 7))
-			error_code = 0;
+		// calculate all needed data for the template
+		int rr = read_mesh_from_printer_config();
+		if (rr)
+		{
+			// missing config or missing mesh data:
+			error_code = rr + 1;
+		}
+		else
+		{
+			if ((probe_count_x != probe_count_y) || (x_count != y_count))
+			{
+				// not square grid setup
+				error_code = 4;
+			}
+			else
+			{
+				if (mesh_grid != probe_count_x)
+				{
+					// mesh grid different from probe grid
+					error_code = 5;
+				}
+			}
+		}
+		// calculate the average and export it in mesh_matrix
+		// calculate_mesh_average(mesh_grid);
+		// apply_precision(mesh_average, precision);
+		// mesh_matrix_export(mesh_average, mesh_grid);
+
+		// Fill the index.html template
+		remove("/mnt/UDISK/webfs/leveling/index.html");
+		int rrr = populate_template_file("/opt/webfs/leveling/index.html", "/mnt/UDISK/webfs/leveling/index.tmp", leveling_template_callback);
+		rename("/mnt/UDISK/webfs/leveling/index.tmp", "/mnt/UDISK/webfs/leveling/index.html");
+	}
+
+	// process all actions from /leveling/index.html and go back to the index.html
+	if ((!strcmp(filename_str, "/mnt/UDISK/webfs/leveling/response.html")))
+	{
+
+		// set no error and no information messages
+		response_code = 0;
+		error_code = 0;
 
 		// check the requested action first
 		char *action = get_key_value(query, "action", "unknown");
+		if (!strcmp(action, "unknown"))
+		{
+			// unknown action
+			error_code = 99;
+		}
 		if (!strcmp(action, "reboot"))
 		{
+			// reboot
 			system("sync && reboot &");
+			response_code = 1;
 		}
 		else if (!strcmp(action, "clear_all"))
 		{
+			// clear all slots
 			int i;
 			char fn_buf[64];
 			for (i = 1; i < MAX_DATA_SLOTS; i++)
@@ -1184,6 +1303,7 @@ void process_custom_pages(char *filename_str, char *query_str)
 				sprintf(fn_buf, "/user/webfs/data_slot_%d.txt", i);
 				remove(fn_buf);
 			}
+			response_code = 2;
 		}
 		else if (!strcmp(action, "clear_slot"))
 		{
@@ -1194,117 +1314,121 @@ void process_custom_pages(char *filename_str, char *query_str)
 				char fn_buf[64];
 				sprintf(fn_buf, "/user/webfs/data_slot_%d.txt", data_slot_int);
 				remove(fn_buf);
+				response_code = 3;
+			}
+			else
+			{
+				error_code = 9;
 			}
 		}
 		else if (!strcmp(action, "save_mesh"))
 		{
-			read_mesh_from_printer_config();
-			char *selected_slot = get_key_value(query, "selected_slot", "0");
-			int selected_slot_int = atoi(selected_slot);
-			if ((selected_slot_int > 0) && (selected_slot_int < MAX_DATA_SLOTS))
+			int rrrr = read_mesh_from_printer_config();
+			if (rrrr)
 			{
-				char fn_buf[64];
-				sprintf(fn_buf, "/user/webfs/data_slot_%d.txt", selected_slot_int);
-				int rr = read_mesh_from_printer_config();
-				if (!rr)
-				{
-					custom_copy_file(NULL, fn_buf, "wb", mesh_config);
-				}
+				// missing config or mesh data
+				error_code = rrrr + 1;
 			}
 			else
 			{
-				error_code = 1;
+				char *selected_slot = get_key_value(query, "selected_slot", "0");
+				int selected_slot_int = atoi(selected_slot);
+				if ((selected_slot_int > 0) && (selected_slot_int < MAX_DATA_SLOTS))
+				{
+					char fn_buf[64];
+					sprintf(fn_buf, "/user/webfs/data_slot_%d.txt", selected_slot_int);
+					custom_copy_file(NULL, fn_buf, "wb", mesh_config);
+					response_code = 4;
+				}
+				else
+				{
+					error_code = 1;
+				}
 			}
 		}
 		else if (!strcmp(action, "set_average"))
 		{
 			// set the average
-			read_mesh_from_printer_config();
-			if ((mesh_grid >= MIN_SUPPORTED_GRID_SIZE) && (mesh_grid <= MAX_SUPPORTED_GRID_SIZE))
+			int rrrr = read_mesh_from_printer_config();
+			if (rrrr)
 			{
-				const char *config_file;
-				detect_printer_defaults(NULL, &config_file, NULL);
-				int avg = calculate_mesh_average(mesh_grid);
-				if (avg > 0)
+				// missing config or mesh data
+				error_code = rrrr + 1;
+			}
+			else
+			{
+				if ((mesh_grid >= MIN_SUPPORTED_GRID_SIZE) && (mesh_grid <= MAX_SUPPORTED_GRID_SIZE))
 				{
-					apply_precision(mesh_average, precision);
-					char replacement_value[1500];
-					mesh_average_export(mesh_grid, replacement_value);
-					update_printer_config_file(config_file, "points", replacement_value);
-					error_code = 7;
-				}
-				else
-				{
-					error_code = 8;
+					const char *config_file;
+					detect_printer_defaults(NULL, &config_file, NULL);
+					int avg_slots = calculate_mesh_average(mesh_grid);
+					if (avg_slots > 0)
+					{
+						apply_precision(mesh_average, precision);
+						mesh_average_export(mesh_grid, mesh_matrix);
+						update_printer_config_file(config_file, "points", mesh_matrix);
+						response_code = 5;
+					}
+					else
+					{
+						error_code = 8;
+					}
 				}
 			}
 		}
 		else if (!strcmp(action, "set_parameters"))
 		{
 			read_mesh_from_printer_config();
-			int grid_sz;
-			detect_printer_defaults(NULL, NULL, &grid_sz);
-			char grid_default[8];
-			sprintf(grid_default, "%d", grid_sz);
 			char *precision_str = get_key_value(query, "precision", "0.01");
 			double precision_float = atof(precision_str);
-			char *grid = get_key_value(query, "grid", grid_default);
+			char *grid = get_key_value(query, "grid", "0");
 			int grid_int = atoi(grid);
 
-			if ((grid_int >= MIN_SUPPORTED_GRID_SIZE) && (grid_int <= MAX_SUPPORTED_GRID_SIZE) && (precision_float >= 0.0001) && (precision_float <= 0.1))
+			if ((grid_int >= MIN_SUPPORTED_GRID_SIZE) && (grid_int <= MAX_SUPPORTED_GRID_SIZE))
 			{
-				if (precision_float != precision)
+				if ((precision_float >= 0.0001) && (precision_float <= 0.1))
 				{
-					precision = precision_float;
-					leveling_config = set_key_value(leveling_config, "precision", precision_str);
-					write_config_file("/user/webfs/parameters.cfg", leveling_config);
-				}
-				if (web_page_grid_size != grid_int)
-				{
-					// set the "probe_count : grid,grid"
-					const char *config_file;
-					detect_printer_defaults(NULL, &config_file, NULL);
-					char replacement_value[8];
-					sprintf(replacement_value, "%d,%d", grid_int, grid_int);
-					update_printer_config_file(config_file, "probe_count", replacement_value);
-					web_page_grid_size = grid_int;
-					error_code = 6;
-				}
-			}
-		}
-
-		// calculate all needed data for the template
-		int rr = read_mesh_from_printer_config();
-		if ((error_code != 6) && (error_code != 7))
-		{
-			if (rr)
-			{
-				error_code = rr + 1;
-			}
-			else
-			{
-				if ((probe_count_x != probe_count_y) || (x_count != y_count))
-				{
-					error_code = 4;
+					if (precision_float != precision)
+					{
+						precision = precision_float;
+						leveling_config = set_key_value(leveling_config, "precision", precision_str);
+						write_config_file("/user/webfs/parameters.cfg", leveling_config);
+						response_code = 6;
+					}
+					else
+					{
+						// no changes
+						error_code = 12;
+					}
+					if (web_page_grid_size != grid_int)
+					{
+						// set the "probe_count : grid,grid"
+						const char *config_file;
+						detect_printer_defaults(NULL, &config_file, NULL);
+						char replacement_value[8];
+						sprintf(replacement_value, "%d,%d", grid_int, grid_int);
+						update_printer_config_file(config_file, "probe_count", replacement_value);
+						web_page_grid_size = grid_int;
+						error_code = 6;
+						response_code = 0;
+					}
 				}
 				else
 				{
-					if (mesh_grid != probe_count_x)
-					{
-						error_code = 5;
-					}
+					// unsupported precision
+					error_code = 11;
 				}
 			}
+			else
+			{
+				// unsupported grid size
+				error_code = 10;
+			}
 		}
-		// calculate the average and export it in mesh_matrix
-		calculate_mesh_average(mesh_grid);
-		apply_precision(mesh_average, precision);
-		// mesh_matrix_export(mesh_average, mesh_grid);
 
-		// Fill the index.html template
-		remove("/mnt/UDISK/webfs/leveling/index.html");
-		int rrr = populate_template_file("/opt/webfs/leveling/index.html", "/mnt/UDISK/webfs/leveling/index.tmp", leveling_template_callback);
-		rename("/mnt/UDISK/webfs/leveling/index.tmp", "/mnt/UDISK/webfs/leveling/index.html");
+		remove("/mnt/UDISK/webfs/leveling/response.html");
+		int rrr = populate_template_file("/opt/webfs/leveling/response.html", "/mnt/UDISK/webfs/leveling/response.tmp", leveling_template_callback);
+		rename("/mnt/UDISK/webfs/leveling/response.tmp", "/mnt/UDISK/webfs/leveling/response.html");
 	}
 
 	// free the config file, will keep it forever in memory
