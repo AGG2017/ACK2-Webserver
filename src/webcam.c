@@ -50,7 +50,7 @@ static enum v_io_method v_io = IO_METHOD_MMAP;
 static int v_fd = -1;
 struct v_buffer *v_buffers;
 static unsigned int n_buffers = 0;
-static int v_force_format = 0;
+static int v_force_format = 1;
 static int v_last_working_video_source = -1;
 
 // ------------------------- memory manager ------------------------
@@ -93,6 +93,97 @@ static void mem_manager_end(void)
 
 // ------------------------- memory manager ------------------------
 
+// YUY2 to RGB conversion function
+void YUY2_to_RGB(const uint8_t *yuy2_data, uint8_t *rgb_data, int width, int height)
+{
+        int i, j;
+        int y0, u, y1, v;
+        int r, g, b;
+
+        for (i = 0; i < height; i++)
+        {
+                for (j = 0; j < width; j += 2)
+                {
+                        y0 = yuy2_data[i * width * 2 + j * 2];
+                        u = yuy2_data[i * width * 2 + j * 2 + 1] - 128;
+                        y1 = yuy2_data[i * width * 2 + j * 2 + 2];
+                        v = yuy2_data[i * width * 2 + j * 2 + 3] - 128;
+
+                        // Convert YUV to RGB
+                        r = (298 * y0 + 409 * v + 128) >> 8;
+                        g = (298 * y0 - 100 * u - 208 * v + 128) >> 8;
+                        b = (298 * y0 + 516 * u + 128) >> 8;
+
+                        // Ensure RGB values are within range
+                        r = r > 255 ? 255 : (r < 0 ? 0 : r);
+                        g = g > 255 ? 255 : (g < 0 ? 0 : g);
+                        b = b > 255 ? 255 : (b < 0 ? 0 : b);
+
+                        rgb_data[i * width * 3 + j * 3] = r;
+                        rgb_data[i * width * 3 + j * 3 + 1] = g;
+                        rgb_data[i * width * 3 + j * 3 + 2] = b;
+
+                        r = (298 * y1 + 409 * v + 128) >> 8;
+                        g = (298 * y1 - 100 * u - 208 * v + 128) >> 8;
+                        b = (298 * y1 + 516 * u + 128) >> 8;
+
+                        r = r > 255 ? 255 : (r < 0 ? 0 : r);
+                        g = g > 255 ? 255 : (g < 0 ? 0 : g);
+                        b = b > 255 ? 255 : (b < 0 ? 0 : b);
+
+                        rgb_data[i * width * 3 + j * 3 + 3] = r;
+                        rgb_data[i * width * 3 + j * 3 + 4] = g;
+                        rgb_data[i * width * 3 + j * 3 + 5] = b;
+                }
+        }
+}
+
+// YUYV422 to RGB conversion function
+void YUYV422_to_RGB(const uint8_t *yuyv_data, uint8_t *rgb_data, int width, int height)
+{
+        int i, j;
+        int y0, u, y1, v;
+        int r, g, b;
+
+        for (i = 0; i < height; i++)
+        {
+                for (j = 0; j < width; j += 2)
+                {
+                        y0 = yuyv_data[i * width * 2 + j * 2];
+                        u = yuyv_data[i * width * 2 + j * 2 + 1] - 128;
+                        y1 = yuyv_data[i * width * 2 + j * 2 + 2];
+                        v = yuyv_data[i * width * 2 + j * 2 + 3] - 128;
+
+                        // Convert YUV to RGB
+                        r = (298 * y0 + 409 * v + 128) >> 8;
+                        g = (298 * y0 - 100 * u - 208 * v + 128) >> 8;
+                        b = (298 * y0 + 516 * u + 128) >> 8;
+
+                        // Ensure RGB values are within range
+                        r = r > 255 ? 255 : (r < 0 ? 0 : r);
+                        g = g > 255 ? 255 : (g < 0 ? 0 : g);
+                        b = b > 255 ? 255 : (b < 0 ? 0 : b);
+
+                        rgb_data[i * width * 3 + j * 3] = r;
+                        rgb_data[i * width * 3 + j * 3 + 1] = g;
+                        rgb_data[i * width * 3 + j * 3 + 2] = b;
+
+                        y1 = yuyv_data[i * width * 2 + j * 2 + 2];
+                        r = (298 * y1 + 409 * v + 128) >> 8;
+                        g = (298 * y1 - 100 * u - 208 * v + 128) >> 8;
+                        b = (298 * y1 + 516 * u + 128) >> 8;
+
+                        r = r > 255 ? 255 : (r < 0 ? 0 : r);
+                        g = g > 255 ? 255 : (g < 0 ? 0 : g);
+                        b = b > 255 ? 255 : (b < 0 ? 0 : b);
+
+                        rgb_data[i * width * 3 + j * 3 + 3] = r;
+                        rgb_data[i * width * 3 + j * 3 + 4] = g;
+                        rgb_data[i * width * 3 + j * 3 + 5] = b;
+                }
+        }
+}
+
 static void v_errno_print(const char *s)
 {
         if (debug)
@@ -111,6 +202,13 @@ static int v_xioctl(int fh, int request, void *arg)
         return r;
 }
 
+// bitmap header for 640 x 480 RGB 24-bit color per point
+const uint8_t bmp_header[54] = {
+    0x42, 0x4D, 0x36, 0x10, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x28, 0x00,
+    0x00, 0x00, 0x80, 0x02, 0x00, 0x00, 0xE0, 0x01, 0x00, 0x00, 0x01, 0x00, 0x18, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x10, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
 // export the result to filename
 static int v_process_image(const char *filename, const void *p, int size)
 {
@@ -118,7 +216,42 @@ static int v_process_image(const char *filename, const void *p, int size)
         ofptr = fopen(filename, "wb");
         if (ofptr)
         {
-                fwrite(p, size, 1, ofptr);
+                if (size == 614400)
+                {
+                        // most likely YUYV or YUY2 raw camera formats
+                        uint8_t *rgb_data = (uint8_t *)mem_manager_calloc(1, 921600);
+                        if (rgb_data)
+                        {
+                                if (debug)
+                                {
+                                        // Option 1: Convert YUY2 to RGB
+                                        YUY2_to_RGB(p, rgb_data, 640, 480);
+                                }
+                                else
+                                {
+                                        // Option 2: Convert YUYV422 to RGB
+                                        YUYV422_to_RGB(p, rgb_data, 640, 480);
+                                }
+                                int padded_size = (640 * 3 + 3) & ~3;
+                                int file_size = 54 + padded_size * 480;
+                                int zero_padding = padded_size - 640 * 3;
+                                fwrite(bmp_header, 54, 1, ofptr);
+                                for (int i = 480 - 1; i >= 0; i--)
+                                {
+                                        fwrite(rgb_data + i * 640 * 3, 1, 640 * 3, ofptr);
+                                        fseek(ofptr, zero_padding, SEEK_CUR);
+                                }
+                        }
+                        else
+                        {
+                                fwrite(p, size, 1, ofptr);
+                        }
+                }
+                else
+                {
+                        // maybe already compressed as AVI
+                        fwrite(p, size, 1, ofptr);
+                }
                 fclose(ofptr);
                 return 0;
         }
