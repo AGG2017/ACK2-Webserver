@@ -50,8 +50,9 @@ static enum v_io_method v_io = IO_METHOD_MMAP;
 static int v_fd = -1;
 struct v_buffer *v_buffers;
 static unsigned int n_buffers = 0;
-static int v_force_format = 1;
+static int v_force_format = 0;
 static int v_last_working_video_source = -1;
+static int v_last_working_video_format = 0;
 
 // ------------------------- memory manager ------------------------
 
@@ -119,9 +120,9 @@ void YUY2_to_RGB(const uint8_t *yuy2_data, uint8_t *rgb_data, int width, int hei
                         g = g > 255 ? 255 : (g < 0 ? 0 : g);
                         b = b > 255 ? 255 : (b < 0 ? 0 : b);
 
-                        rgb_data[i * width * 3 + j * 3] = r;
-                        rgb_data[i * width * 3 + j * 3 + 1] = g;
-                        rgb_data[i * width * 3 + j * 3 + 2] = b;
+                        rgb_data[i * width * 3 + j * 3] = b;     // r
+                        rgb_data[i * width * 3 + j * 3 + 1] = g; // g
+                        rgb_data[i * width * 3 + j * 3 + 2] = r; // b
 
                         r = (298 * y1 + 409 * v + 128) >> 8;
                         g = (298 * y1 - 100 * u - 208 * v + 128) >> 8;
@@ -131,55 +132,9 @@ void YUY2_to_RGB(const uint8_t *yuy2_data, uint8_t *rgb_data, int width, int hei
                         g = g > 255 ? 255 : (g < 0 ? 0 : g);
                         b = b > 255 ? 255 : (b < 0 ? 0 : b);
 
-                        rgb_data[i * width * 3 + j * 3 + 3] = r;
-                        rgb_data[i * width * 3 + j * 3 + 4] = g;
-                        rgb_data[i * width * 3 + j * 3 + 5] = b;
-                }
-        }
-}
-
-// YUYV422 to RGB conversion function
-void YUYV422_to_RGB(const uint8_t *yuyv_data, uint8_t *rgb_data, int width, int height)
-{
-        int i, j;
-        int y0, u, y1, v;
-        int r, g, b;
-
-        for (i = 0; i < height; i++)
-        {
-                for (j = 0; j < width; j += 2)
-                {
-                        y0 = yuyv_data[i * width * 2 + j * 2];
-                        u = yuyv_data[i * width * 2 + j * 2 + 1] - 128;
-                        y1 = yuyv_data[i * width * 2 + j * 2 + 2];
-                        v = yuyv_data[i * width * 2 + j * 2 + 3] - 128;
-
-                        // Convert YUV to RGB
-                        r = (298 * y0 + 409 * v + 128) >> 8;
-                        g = (298 * y0 - 100 * u - 208 * v + 128) >> 8;
-                        b = (298 * y0 + 516 * u + 128) >> 8;
-
-                        // Ensure RGB values are within range
-                        r = r > 255 ? 255 : (r < 0 ? 0 : r);
-                        g = g > 255 ? 255 : (g < 0 ? 0 : g);
-                        b = b > 255 ? 255 : (b < 0 ? 0 : b);
-
-                        rgb_data[i * width * 3 + j * 3] = r;
-                        rgb_data[i * width * 3 + j * 3 + 1] = g;
-                        rgb_data[i * width * 3 + j * 3 + 2] = b;
-
-                        y1 = yuyv_data[i * width * 2 + j * 2 + 2];
-                        r = (298 * y1 + 409 * v + 128) >> 8;
-                        g = (298 * y1 - 100 * u - 208 * v + 128) >> 8;
-                        b = (298 * y1 + 516 * u + 128) >> 8;
-
-                        r = r > 255 ? 255 : (r < 0 ? 0 : r);
-                        g = g > 255 ? 255 : (g < 0 ? 0 : g);
-                        b = b > 255 ? 255 : (b < 0 ? 0 : b);
-
-                        rgb_data[i * width * 3 + j * 3 + 3] = r;
-                        rgb_data[i * width * 3 + j * 3 + 4] = g;
-                        rgb_data[i * width * 3 + j * 3 + 5] = b;
+                        rgb_data[i * width * 3 + j * 3 + 3] = b; // r
+                        rgb_data[i * width * 3 + j * 3 + 4] = g; // g
+                        rgb_data[i * width * 3 + j * 3 + 5] = r; // b
                 }
         }
 }
@@ -202,14 +157,15 @@ static int v_xioctl(int fh, int request, void *arg)
         return r;
 }
 
-// bitmap header for 640 x 480 RGB 24-bit color per point
+// fixed bitmap header for 640 x 480 RGB 24-bit color per point
 const uint8_t bmp_header[54] = {
     0x42, 0x4D, 0x36, 0x10, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x28, 0x00,
     0x00, 0x00, 0x80, 0x02, 0x00, 0x00, 0xE0, 0x01, 0x00, 0x00, 0x01, 0x00, 0x18, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x10, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-// export the result to filename
+// export the result to a file
+// auto select between the original compression and YUY2/YUYV to RGB for raw format cameras
 static int v_process_image(const char *filename, const void *p, int size)
 {
         FILE *ofptr;
@@ -222,16 +178,8 @@ static int v_process_image(const char *filename, const void *p, int size)
                         uint8_t *rgb_data = (uint8_t *)mem_manager_calloc(1, 921600);
                         if (rgb_data)
                         {
-                                if (debug)
-                                {
-                                        // Option 1: Convert YUY2 to RGB
-                                        YUY2_to_RGB(p, rgb_data, 640, 480);
-                                }
-                                else
-                                {
-                                        // Option 2: Convert YUYV422 to RGB
-                                        YUYV422_to_RGB(p, rgb_data, 640, 480);
-                                }
+                                // Convert YUY2 to RGB
+                                YUY2_to_RGB(p, rgb_data, 640, 480);
                                 int padded_size = (640 * 3 + 3) & ~3;
                                 int file_size = 54 + padded_size * 480;
                                 int zero_padding = padded_size - 640 * 3;
@@ -888,57 +836,68 @@ static void usage(FILE *fp, int argc, char **argv)
 int v_capture_image(const char *v_filename, int v_frame_count)
 {
         int result = 0;
-        int i, beg, end;
+        int i, j, beg, end, fbeg, fend;
         if (v_last_working_video_source >= 0)
         {
                 // good video source is already available
                 beg = v_last_working_video_source;
                 end = v_last_working_video_source;
+                fbeg = v_last_working_video_format;
+                fend = v_last_working_video_format;
         }
         else
         {
-                // try to find another video source
+                // try to find another video source and format
                 beg = 0;
-                end = 9;
+                end = 3;
+                fbeg = 0;
+                fend = 1;
         }
-        for (i = beg; i <= end; i++)
+        for (j = fbeg; j <= fend; j++)
         {
-                sprintf(v_dev_name, "/dev/video%d", i);
-                mem_manager_begin();
-                if (v_open_device() >= 0)
+                v_force_format = j;
+                for (i = beg; i <= end; i++)
                 {
-                        if (v_init_device() >= 0)
+                        sprintf(v_dev_name, "/dev/video%d", i);
+                        mem_manager_begin();
+                        if (v_open_device() >= 0)
                         {
-                                if (v_start_capturing() >= 0)
+                                if (v_init_device() >= 0)
                                 {
-                                        if (v_mainloop(v_filename, v_frame_count) >= 0)
+                                        if (v_start_capturing() >= 0)
                                         {
-                                                if (v_stop_capturing() >= 0)
+                                                if (v_mainloop(v_filename, v_frame_count) >= 0)
                                                 {
-                                                        if (v_uninit_device() >= 0)
+                                                        if (v_stop_capturing() >= 0)
                                                         {
-                                                                if (v_close_device() >= 0)
+                                                                if (v_uninit_device() >= 0)
                                                                 {
-                                                                        result = 1;
+                                                                        if (v_close_device() >= 0)
+                                                                        {
+                                                                                result = 1;
+                                                                        }
                                                                 }
                                                         }
                                                 }
                                         }
                                 }
                         }
-                }
-                mem_manager_end();
-                if (result)
-                {
-                        // found a video source with no errors
-                        v_last_working_video_source = i;
-                        break;
+                        mem_manager_end();
+                        if (result)
+                        {
+                                // found a video source with no errors
+                                v_last_working_video_source = i;
+                                v_last_working_video_format = j;
+                                goto e_n_d;
+                        }
                 }
         }
+e_n_d:
         if (!result)
         {
                 // missing a good video source, set mode searching for the next call
                 v_last_working_video_source = -1;
+                v_last_working_video_format = 0;
         }
         return result;
 }
