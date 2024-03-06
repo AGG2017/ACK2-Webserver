@@ -9,7 +9,7 @@ if [ $? -eq 0 ]; then
 	cp -f webfsd ../webserver/opt/bin/webfsd
 	cd ../webserver
 	rm -f webserver.zip
-	zip -r webserver.zip etc opt
+	zip -r --symlinks webserver.zip etc opt
 	echo "SUCCESS! The package is ready in: webserver/webserver.zip"
 	cd ..
 	exit 0
