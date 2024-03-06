@@ -1,12 +1,12 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>LEVELING TOOLS</title>
+  <title>TOOLS</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 </head>		
 <body style="background-color:rgb(240, 213, 233);" onunload="">
 <center><p style="color: red; padding: 0 10px;">{#}</p></center>
-<center><h2>LEVELING TOOLS</h2></center>
+<center><h2>TOOLS</h2></center>
 <form action="response.html" method="get" name="set_parameters" >
   <fieldset>
   <span><b>SELECT PARAMETERS:</b></span></span></span>
@@ -60,6 +60,27 @@
   <span><b>REBOOT THE PRINTER:</b></span>
   <input type="hidden" name="action" value="reboot">
   <input type="submit" value="REBOOT">
+  </fieldset>
+</form>
+<form action="response.html" method="get" name="ssh_start" >
+  <fieldset>
+  <span><b>SSH:</b></span>
+  <input type="hidden" name="action" value="ssh_start">
+  <input type="submit" value="START">
+  </fieldset>
+</form>
+<form action="response.html" method="get" name="ssh_stop" >
+  <fieldset>
+  <span><b>SSH:</b></span>
+  <input type="hidden" name="action" value="ssh_stop">
+  <input type="submit" value="STOP">
+  </fieldset>
+</form>
+<form action="response.html" method="get" name="ssh_status" >
+  <fieldset>
+  <span><b>SSH:</b></span>
+  <input type="hidden" name="action" value="ssh_status">
+  <input type="submit" value="STATUS">
   </fieldset>
 </form>
 <form action="../mesh/index.html" method="get" name="config" >

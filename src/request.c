@@ -287,6 +287,36 @@ const BYTE GRID[] = {
 		0,
 		0};
 
+#define SYSTEM_BUFFER_MAX 1024
+char system_buffer[SYSTEM_BUFFER_MAX];
+
+int system_with_output(const char *cmd, int line_number)
+{
+	FILE *fp;
+	int n = 0;
+
+	/* Open the command for reading. */
+	fp = popen(cmd, "r");
+	if (fp == NULL)
+	{
+		return 1;
+	}
+	/* Read the output a line at a time - output it. */
+	while (fgets(system_buffer, SYSTEM_BUFFER_MAX, fp) != NULL)
+	{
+		if (debug)
+		{
+			fprintf(stderr, "+++ system: %s\n", system_buffer);
+		}
+		n++;
+		if (n == line_number)
+			break;
+	}
+	/* close */
+	pclose(fp);
+	return 0;
+}
+
 U32 file_lenght(const char *fname)
 {
 	struct stat st;
@@ -842,6 +872,15 @@ char *leveling_template_callback(char key)
 			static_template_ptr = "SUCCESS: Selected new arithmetic precision has been set!";
 			return static_template_ptr;
 		}
+		if (response_code == 7)
+		{
+			return system_buffer;
+		}
+		if (response_code == 8)
+		{
+			static_template_ptr = "SUCCESS: The requested command has been executed!";
+			return static_template_ptr;
+		}
 
 		// default - no response shown
 		static_template_buffer[0] = 0;
@@ -908,6 +947,11 @@ char *leveling_template_callback(char key)
 		if (error_code == 12)
 		{
 			static_template_ptr = "WARNING: No change detected in the requested parameters. These values are already set!";
+			return static_template_ptr;
+		}
+		if (error_code == 13)
+		{
+			static_template_ptr = "ERROR: SSH service is not installed!";
 			return static_template_ptr;
 		}
 		if (error_code == 99)
@@ -1232,8 +1276,8 @@ void process_custom_pages(char *filename_str, char *query_str)
 		rename("/mnt/UDISK/webfs/webcam/cam.tmp", "/mnt/UDISK/webfs/webcam/cam.jpg");
 	}
 
-	// ----------------------------- access to the leveling tools index.html -----------------------------
-	if ((!strcmp(filename_str, "/mnt/UDISK/webfs/leveling/index.html")))
+	// ----------------------------- access to the tools index.html -------------------------
+	if ((!strcmp(filename_str, "/mnt/UDISK/webfs/tools/index.html")))
 	{
 		response_code = 0;
 		error_code = 0;
@@ -1267,13 +1311,13 @@ void process_custom_pages(char *filename_str, char *query_str)
 		// mesh_matrix_export(mesh_average, mesh_grid);
 
 		// Fill the index.html template
-		remove("/mnt/UDISK/webfs/leveling/index.html");
-		int rrr = populate_template_file("/opt/webfs/leveling/index.html", "/mnt/UDISK/webfs/leveling/index.tmp", leveling_template_callback);
-		rename("/mnt/UDISK/webfs/leveling/index.tmp", "/mnt/UDISK/webfs/leveling/index.html");
+		remove("/mnt/UDISK/webfs/tools/index.html");
+		int rrr = populate_template_file("/opt/webfs/tools/index.html", "/mnt/UDISK/webfs/tools/index.tmp", leveling_template_callback);
+		rename("/mnt/UDISK/webfs/tools/index.tmp", "/mnt/UDISK/webfs/tools/index.html");
 	}
 
 	// process all actions from /leveling/index.html and go back to the index.html
-	if ((!strcmp(filename_str, "/mnt/UDISK/webfs/leveling/response.html")))
+	if ((!strcmp(filename_str, "/mnt/UDISK/webfs/tools/response.html")))
 	{
 
 		// set no error and no information messages
@@ -1293,6 +1337,47 @@ void process_custom_pages(char *filename_str, char *query_str)
 			system("sync && reboot &");
 			response_code = 1;
 		}
+
+		if (!strcmp(action, "ssh_status"))
+		{
+			// ssh status
+			if (file_exists("/opt/etc/init.d/S51dropbear"))
+			{
+				system_with_output("/opt/etc/init.d/S51dropbear status 2>&1", 1);
+				response_code = 7;
+			}
+			else
+			{
+				error_code = 13;
+			}
+		}
+		if (!strcmp(action, "ssh_start"))
+		{
+			// ssh start
+			if (file_exists("/opt/etc/init.d/S51dropbear"))
+			{
+				system_with_output("/opt/etc/init.d/S51dropbear start 2>&1", 1);
+				response_code = 8;
+			}
+			else
+			{
+				error_code = 13;
+			}
+		}
+		if (!strcmp(action, "ssh_stop"))
+		{
+			// ssh stop
+			if (file_exists("/opt/etc/init.d/S51dropbear"))
+			{
+				system_with_output("/opt/etc/init.d/S51dropbear stop 2>&1", 1);
+				response_code = 8;
+			}
+			else
+			{
+				error_code = 13;
+			}
+		}
+
 		else if (!strcmp(action, "clear_all"))
 		{
 			// clear all slots
@@ -1426,9 +1511,9 @@ void process_custom_pages(char *filename_str, char *query_str)
 			}
 		}
 
-		remove("/mnt/UDISK/webfs/leveling/response.html");
-		int rrr = populate_template_file("/opt/webfs/leveling/response.html", "/mnt/UDISK/webfs/leveling/response.tmp", leveling_template_callback);
-		rename("/mnt/UDISK/webfs/leveling/response.tmp", "/mnt/UDISK/webfs/leveling/response.html");
+		remove("/mnt/UDISK/webfs/tools/response.html");
+		int rrr = populate_template_file("/opt/webfs/tools/response.html", "/mnt/UDISK/webfs/tools/response.tmp", leveling_template_callback);
+		rename("/mnt/UDISK/webfs/tools/response.tmp", "/mnt/UDISK/webfs/tools/response.html");
 	}
 
 	// free the config file, will keep it forever in memory

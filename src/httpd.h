@@ -130,7 +130,7 @@ static void inline list_free(struct strlist **list)
     *list = NULL;
 }
 
-/* --- main.c --------------------------------------------------- */
+/* --- webfsd.c ------------------------------------------------ */
 
 extern int debug;
 extern int tcp_port;
@@ -151,6 +151,7 @@ extern int have_tty;
 
 void xperror(int loglevel, char *txt, char *peerhost);
 void xerror(int loglevel, char *txt, char *peerhost);
+int file_exists(const char *filename);
 
 static void inline close_on_exec(int fd)
 {

@@ -37,7 +37,7 @@ int tcp_port = 0;
 int max_dircache = 128;
 char *cors = NULL;
 char *doc_root = "/mnt/UDISK/webfs";
-const char *doc_root_ver = "/mnt/UDISK/webfs/mesh/ver_004";
+const char *doc_root_ver = "/mnt/UDISK/webfs/ver_005";
 char *indexhtml = "index.html";
 char *listen_ip = NULL;
 char *listen_port = "8000";
@@ -150,7 +150,7 @@ usage(char *name)
 }
 
 // return true if the file specified by the filename exists
-static int file_exists(const char *filename)
+int file_exists(const char *filename)
 {
 	FILE *fp = fopen(filename, "r");
 	int is_exist = 0;
