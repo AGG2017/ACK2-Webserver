@@ -1,5 +1,6 @@
 #include <sys/stat.h>
 
+// #define MORE_INFO
 // #define NO_SENDFILE
 
 #define STATE_READ_HEADER 1
@@ -13,6 +14,7 @@
 #define STATE_KEEPALIVE 8
 #define STATE_CLOSE 9
 
+#define MAX_SENDFILE 4096
 #define MAX_HEADER 4096
 #define MAX_PATH 2048
 #define MAX_HOST 64

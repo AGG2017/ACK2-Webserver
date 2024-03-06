@@ -1888,7 +1888,7 @@ void parse_request(struct REQUEST *req)
 	int port, rc, len;
 	struct passwd *pw = NULL;
 
-	if (debug > 2)
+	if (debug)
 		fprintf(stderr, "%s\n", req->hreq);
 
 	/* parse request. Here, scanf is powerful :-) */

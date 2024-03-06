@@ -166,6 +166,9 @@ static int file_exists(const char *filename)
 static void create_root_doc_if_required(void)
 {
 	struct stat st = {0};
+
+	system("sleep 5");
+
 	if (stat("/user/webfs", &st) == -1)
 	{
 		mkdir("/user/webfs", 0700);
@@ -178,7 +181,7 @@ static void create_root_doc_if_required(void)
 	// delete the old one
 	system("rm -rf /mnt/UDISK/webfs");
 	// copy the new one
-	system("cp -r /opt/webfs /mnt/UDISK");
+	system("cp -rf /opt/webfs /mnt/UDISK");
 	return;
 }
 
@@ -725,10 +728,6 @@ int main(int argc, char *argv[])
 	char serv[16];
 	char mypid[12];
 
-	// verify if the copy of the doc root exists
-	// if not create it
-	create_root_doc_if_required();
-
 	uid = getuid();
 	euid = geteuid();
 	if (uid != euid)
@@ -1024,6 +1023,10 @@ int main(int argc, char *argv[])
 	sigaction(SIGTERM, &act, &old);
 	if (debug)
 		sigaction(SIGINT, &act, &old);
+
+	// verify if the copy of the doc root exists
+	// if not create it
+	create_root_doc_if_required();
 
 	mainloop(NULL);
 

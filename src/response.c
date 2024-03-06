@@ -38,8 +38,8 @@
 
 static inline size_t off_to_size(off_t off_bytes)
 {
-	if (off_bytes > SSIZE_MAX)
-		return SSIZE_MAX;
+	if (off_bytes > MAX_SENDFILE)
+		return MAX_SENDFILE;
 	return off_bytes;
 }
 
@@ -49,7 +49,14 @@ static inline size_t off_to_size(off_t off_bytes)
 static ssize_t xsendfile(int out, int in, off_t offset, off_t off_bytes)
 {
 	size_t bytes = off_to_size(off_bytes);
-	return sendfile(out, in, &offset, bytes);
+#ifdef MORE_INFO
+	fprintf(stderr, "+++ call xsendfile %d, %d, %d, %d\n", out, in, offset, bytes);
+#endif
+	int send_bytes = sendfile(out, in, &offset, bytes);
+#ifdef MORE_INFO
+	fprintf(stderr, "+++ retn xsendfile %d\n", send_bytes);
+#endif
+	return send_bytes;
 }
 
 #else
@@ -220,7 +227,7 @@ mkmulti(struct REQUEST *req, int i)
 													 (int64_t)req->r_start[i],
 													 (int64_t)req->r_end[i] - 1,
 													 (int64_t)req->bst.st_size);
-	if (debug > 1)
+	if (debug)
 		fprintf(stderr, "%03d: send range: %" PRId64 "-%" PRId64 "/%" PRId64 " (%" PRId64 " byte)\n",
 						req->fd,
 						(int64_t)req->r_start[i],
@@ -403,7 +410,7 @@ void write_request(struct REQUEST *req)
 				req->state = STATE_CLOSE;
 				return;
 			default:
-				if (debug > 1)
+				if (debug)
 					fprintf(stderr, "%03d: %" PRId64 "/%" PRId64 " (%d%%)\r", req->fd,
 									(int64_t)req->written, (int64_t)req->bst.st_size,
 									(int)(req->written * 100 / req->bst.st_size));

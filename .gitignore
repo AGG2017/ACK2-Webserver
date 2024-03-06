@@ -5,3 +5,4 @@ src/webfsd
 webserver/webserver.zip
 webserver/opt/bin/webfsd
 mybuild.sh
+originals/
