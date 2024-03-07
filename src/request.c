@@ -12,6 +12,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/sysinfo.h>
 #include <netinet/in.h>
 
 #include "httpd.h"
@@ -470,6 +471,8 @@ int x_count = 0;
 int y_count = 0;
 // web page grid size
 int web_page_grid_size = 0;
+// bed temperature
+int bed_temp = 60;
 // used profile number
 int used_profile = 1;
 int saved_profile = 1;
@@ -773,6 +776,7 @@ int read_mesh_from_printer_config(void)
 		mesh_config_clear();
 		mesh_clear(mesh_values);
 		mesh_grid = 0;
+		bed_temp = 60;
 		probe_count_x = 0;
 		probe_count_y = 0;
 		x_count = 0;
@@ -834,6 +838,12 @@ int read_mesh_from_printer_config(void)
 				{
 					z_offset = atof(&b[11]);
 				}
+				else if (b[0] == 'b' && b[1] == 'e' && b[2] == 'd' && b[3] == '_' && b[4] == 'm' &&
+								 b[5] == 'e' && b[6] == 's' && b[7] == 'h' && b[8] == '_' && b[9] == 't' && b[10] == 'e' &&
+								 b[11] == 'm' && b[12] == 'p' && b[13] == ' ' && b[14] == ':' && b[15] == ' ')
+				{
+					bed_temp = atoi(&b[16]);
+				}
 			}
 			fclose(file);
 			if (b)
@@ -848,6 +858,32 @@ char *static_template_ptr;
 config_option_t leveling_config = NULL;
 int error_code;
 int response_code;
+
+// update /mnt/UDISK/webfs/api/info.json
+int update_api(void)
+{
+	U32 total_mem = sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGESIZE);
+	U32 free_mem = sysconf(_SC_AVPHYS_PAGES) * sysconf(_SC_PAGESIZE);
+	U32 free_mem_per = (free_mem * 100) / total_mem;
+	U32 cpu_use = 0;
+	U32 cpu_usr_use = 0;
+	U32 cpu_sys_use = 0;
+	U32 cpu_idle = 0;
+	char cpu[10];
+	int t0, t1, t2, t3, t4, t5, t6, t7, t8, t9;
+	system_with_output("cat /proc/stat", 1);
+	int n = sscanf(system_buffer, "%s %d %d %d %d %d %d %d %d %d %d", cpu, &t0, &t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
+	if (n == 11)
+	{
+		cpu_use = ((t0 + t2) * 100) / (t0 + t2 + t3);
+		cpu_usr_use = (t0 * 100) / (t0 + t2 + t3);
+		cpu_sys_use = (t2 * 100) / (t0 + t2 + t3);
+		cpu_idle = (t3 * 100) / (t0 + t2 + t3);
+	}
+	sprintf(static_template_buffer, "{\"api_ver\":1, \"total_mem\":%d, \"free_mem\":%d, \"free_mem_per\":%d, \"cpu_use\":%d, \"cpu_usr_use\":%d, \"cpu_sys_use\":%d, \"cpu_idle\":%d}", total_mem, free_mem, free_mem_per, cpu_use, cpu_usr_use, cpu_sys_use, cpu_idle);
+	// export buffer to file
+	return custom_copy_file(NULL, "/mnt/UDISK/webfs/api/info.json", "wb", static_template_buffer);
+}
 
 char *leveling_template_callback(char key)
 {
@@ -901,6 +937,11 @@ char *leveling_template_callback(char key)
 		if (response_code == 10)
 		{
 			sprintf(static_template_buffer, "SUCCESS: Profile %d is set to be used. Please reboot the printer!", saved_profile);
+			return static_template_buffer;
+		}
+		if (response_code == 11)
+		{
+			sprintf(static_template_buffer, "SUCCESS: Selected bed mesh temperature %d C has been set!", bed_temp);
 			return static_template_buffer;
 		}
 
@@ -1006,6 +1047,11 @@ char *leveling_template_callback(char key)
 			static_template_ptr = "ERROR: Cannot use this profile!";
 			return static_template_ptr;
 		}
+		if (error_code == 20)
+		{
+			static_template_ptr = "ERROR: Unsupported bed temperature!";
+			return static_template_ptr;
+		}
 		if (error_code == 99)
 		{
 			static_template_ptr = "ERROR: Unsupported function requested!";
@@ -1076,6 +1122,12 @@ char *leveling_template_callback(char key)
 		// the number of slots to average
 		calculate_mesh_average(mesh_grid);
 		sprintf(static_template_buffer, "%d", mesh_accumulations);
+		return static_template_buffer;
+	}
+	if (key == 'T')
+	{
+		// current bed mesh temperature
+		sprintf(static_template_buffer, "%d", bed_temp);
 		return static_template_buffer;
 	}
 	if (key == 'D')
@@ -1336,6 +1388,12 @@ void process_custom_pages(char *filename_str, char *query_str)
 			custom_copy_file("/mnt/UDISK/webfs/webcam/default.jpg", "/mnt/UDISK/webfs/webcam/cam.tmp", "wb", NULL);
 		}
 		rename("/mnt/UDISK/webfs/webcam/cam.tmp", "/mnt/UDISK/webfs/webcam/cam.jpg");
+	}
+
+	// ----------------------------- access to the api.json file ----------------------------
+	if ((!strcmp(filename_str, "/mnt/UDISK/webfs/api/info.json")))
+	{
+		update_api();
 	}
 
 	// ----------------------------- access to the tools index.html -------------------------
@@ -1632,52 +1690,82 @@ void process_custom_pages(char *filename_str, char *query_str)
 			double precision_float = atof(precision_str);
 			char *grid = get_key_value(query, "grid", "0");
 			int grid_int = atoi(grid);
-
-			if ((grid_int >= MIN_SUPPORTED_GRID_SIZE) && (grid_int <= MAX_SUPPORTED_GRID_SIZE))
+			char *bed_temp_str = get_key_value(query, "bed_temp", "60");
+			int bed_temp_int = atoi(bed_temp_str);
+			if ((bed_temp_int >= 0) && (bed_temp_int <= 90))
 			{
-				if ((precision_float >= 0.0001) && (precision_float <= 0.1))
+				if ((grid_int >= MIN_SUPPORTED_GRID_SIZE) && (grid_int <= MAX_SUPPORTED_GRID_SIZE))
 				{
-					if (precision_float != precision)
+					if ((precision_float >= 0.0001) && (precision_float <= 0.1))
 					{
-						precision = precision_float;
-						leveling_config = set_key_value(leveling_config, "precision", precision_str);
-						write_config_file("/user/webfs/parameters.cfg", leveling_config);
-						response_code = 6;
-					}
-					else
-					{
-						// no changes
-						error_code = 12;
-					}
-					if (web_page_grid_size != grid_int)
-					{
-						// set the "probe_count : grid,grid"
-						const char *config_file;
-						if (!detect_printer_defaults(NULL, &config_file, NULL, NULL))
+						if (bed_temp_int != bed_temp)
 						{
-							char replacement_value[8];
-							sprintf(replacement_value, "%d,%d", grid_int, grid_int);
-							update_printer_config_file(config_file, "probe_count", replacement_value);
-							web_page_grid_size = grid_int;
-							error_code = 6;
-							response_code = 0;
+							const char *config_file;
+							if (!detect_printer_defaults(NULL, &config_file, NULL, NULL))
+							{
+								char replacement_value[8];
+								sprintf(replacement_value, "%d", bed_temp_int);
+								update_printer_config_file(config_file, "bed_mesh_temp", replacement_value);
+								bed_temp = bed_temp_int;
+								response_code = 11;
+							}
+							else
+							{
+								error_code = 15; // cannot detect printer configuration
+							}
 						}
 						else
 						{
-							error_code = 15; // cannot detect printer configuration
+							// no changes
+							error_code = 12;
 						}
+						if (precision_float != precision)
+						{
+							precision = precision_float;
+							leveling_config = set_key_value(leveling_config, "precision", precision_str);
+							write_config_file("/user/webfs/parameters.cfg", leveling_config);
+							response_code = 6;
+						}
+						else
+						{
+							// no changes
+							error_code = 12;
+						}
+						if (web_page_grid_size != grid_int)
+						{
+							// set the "probe_count : grid,grid"
+							const char *config_file;
+							if (!detect_printer_defaults(NULL, &config_file, NULL, NULL))
+							{
+								char replacement_value[8];
+								sprintf(replacement_value, "%d,%d", grid_int, grid_int);
+								update_printer_config_file(config_file, "probe_count", replacement_value);
+								web_page_grid_size = grid_int;
+								error_code = 6;
+								response_code = 0;
+							}
+							else
+							{
+								error_code = 15; // cannot detect printer configuration
+							}
+						}
+					}
+					else
+					{
+						// unsupported precision
+						error_code = 11;
 					}
 				}
 				else
 				{
-					// unsupported precision
-					error_code = 11;
+					// unsupported grid size
+					error_code = 10;
 				}
 			}
 			else
 			{
-				// unsupported grid size
-				error_code = 10;
+				// unsupported bed temperature
+				error_code = 20;
 			}
 		}
 

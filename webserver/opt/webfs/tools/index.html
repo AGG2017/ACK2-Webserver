@@ -12,9 +12,10 @@
   <span><b>SELECT PARAMETERS:</b></span></span></span>
   <span>Average Precision: </span><input type="number" name="precision" size="7" value="{A}" step="0.0001" min="0.0001" max="0.1" />
   <span>Grid Size (2-10): </span><input type="number" name="grid" size="3" value="{B}" min="2" max="10" />
+  <span>Bed Temp (0-90): </span><input type="number" name="bed_temp" size="3" value="{T}" min="0" max="90" />
   <input type="hidden" name="action" value="set_parameters">
   <input type="submit" value="UPDATE">
-  <span>Note: Changing the 'Grid Size' requires to reboot the printer!</span>
+  <span>Note: Changing the 'Grid Size' or 'Bed Temp' requires to reboot the printer!</span>
   </fieldset>
 </form>
 <form action="response.html" method="get" name="save_mesh" >
