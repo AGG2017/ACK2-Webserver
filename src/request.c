@@ -1313,7 +1313,11 @@ void process_custom_pages(char *filename_str, char *query_str)
 		leveling_config = read_config_file("/user/webfs/parameters.cfg");
 		// get the most important parameters once
 		char *precision_str = get_key_value(leveling_config, "precision", "0.01");
-		double precision = atof(precision_str);
+		precision = atof(precision_str);
+		if ((precision < 0.0001) || (precision > 0.1))
+		{
+			precision = 0.01;
+		}
 	}
 
 	if (debug)
@@ -1711,13 +1715,9 @@ void process_custom_pages(char *filename_str, char *query_str)
 							}
 							else
 							{
+								response_code = 0;
 								error_code = 15; // cannot detect printer configuration
 							}
-						}
-						else
-						{
-							// no changes
-							error_code = 12;
 						}
 						if (precision_float != precision)
 						{
@@ -1725,11 +1725,6 @@ void process_custom_pages(char *filename_str, char *query_str)
 							leveling_config = set_key_value(leveling_config, "precision", precision_str);
 							write_config_file("/user/webfs/parameters.cfg", leveling_config);
 							response_code = 6;
-						}
-						else
-						{
-							// no changes
-							error_code = 12;
 						}
 						if (web_page_grid_size != grid_int)
 						{
@@ -1746,25 +1741,35 @@ void process_custom_pages(char *filename_str, char *query_str)
 							}
 							else
 							{
+								response_code = 0;
 								error_code = 15; // cannot detect printer configuration
 							}
+						}
+						if ((response_code == 0) && (error_code == 0))
+						{
+							// no changes
+							response_code = 0;
+							error_code = 12;
 						}
 					}
 					else
 					{
 						// unsupported precision
+						response_code = 0;
 						error_code = 11;
 					}
 				}
 				else
 				{
 					// unsupported grid size
+					response_code = 0;
 					error_code = 10;
 				}
 			}
 			else
 			{
 				// unsupported bed temperature
+				response_code = 0;
 				error_code = 20;
 			}
 		}
