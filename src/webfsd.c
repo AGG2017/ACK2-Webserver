@@ -37,7 +37,7 @@ int tcp_port = 0;
 int max_dircache = 128;
 char *cors = NULL;
 char *doc_root = "/mnt/UDISK/webfs";
-const char *doc_root_ver = "/mnt/UDISK/webfs/ver_005";
+const char *doc_root_ver = "/mnt/UDISK/webfs/ver_004_1";
 char *indexhtml = "index.html";
 char *listen_ip = NULL;
 char *listen_port = "8000";
@@ -167,18 +167,43 @@ static void create_root_doc_if_required(void)
 {
 	struct stat st = {0};
 
+	// wait the boot process to complete
 	system("sleep 5");
 
 	if (stat("/user/webfs", &st) == -1)
 	{
+		// webserver config folder does not exist
+		// create this folder
 		mkdir("/user/webfs", 0700);
 	}
 
-	if (file_exists(doc_root_ver))
-		return;
-	// doc root does not exists for the required version
+	if (stat("/user/webfs/profiles", &st) == -1)
+	{
+		// profiles folder does not exist
+		// create all profiles with the current configs
+		mkdir("/user/webfs/profiles", 0700);
+		char buf[64];
+		int i;
+		for (i = 1; i < 10; i++)
+		{
+			sprintf(buf, "/user/webfs/profiles/%d", i);
+			mkdir(buf, 0700);
+			sprintf(buf, "cp /user/printer*.cfg /user/webfs/profiles/%d", i);
+			system(buf);
+			sprintf(buf, "cp /user/unmodifiable.cfg /user/webfs/profiles/%d", i);
+			system(buf);
+		}
+	}
 
-	// delete the old one
+	if (file_exists(doc_root_ver))
+	{
+		// doc root exists, exit
+		return;
+	}
+
+	// doc root does not exists for the required package version
+
+	// delete the old one if exists
 	system("rm -rf /mnt/UDISK/webfs");
 	// copy the new one
 	system("cp -rf /opt/webfs /mnt/UDISK");

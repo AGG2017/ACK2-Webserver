@@ -388,49 +388,58 @@ int custom_copy_file(const char *from, const char *to, const char *mode, const c
 // cfg_filename: "/user/printer.cfg", "/user/printer_plus.cfg" or "/user/printer_max.cfg"
 // grid_size: 5 for K2Pro or 7 for K2Plus and K2Max
 // return 0 if success, or the error code
-int detect_printer_defaults(const char **printer_model, const char **cfg_filename, int *grid_size)
+int detect_printer_defaults(const char **printer_model, const char **cfg_path, const char **cfg_filename, int *grid_size)
 {
-	const char *k2pro_cfg = "/user/printer.cfg";
-	const char *k2plus_cfg = "/user/printer_plus.cfg";
-	const char *k2max_cfg = "/user/printer_max.cfg";
-	const char *k2_cfg = NULL;
+	const char *k2pro_file = "printer.cfg";
+	const char *k2plus_file = "printer_plus.cfg";
+	const char *k2max_file = "printer_max.cfg";
+	const char *k2pro_path = "/user/printer.cfg";
+	const char *k2plus_path = "/user/printer_plus.cfg";
+	const char *k2max_path = "/user/printer_max.cfg";
+	const char *k2_file = NULL;
+	const char *k2_path = NULL;
 	const char *model_name = NULL;
 	int grid = 0;
 
 	// find out the model and the config file name
-	if (file_lenght(k2pro_cfg) > 0)
+	if (file_lenght(k2pro_path) > 0)
 	{
-		k2_cfg = k2pro_cfg;
+		k2_file = k2pro_file;
+		k2_path = k2pro_path;
 		model_name = "K2Pro";
 		grid = 5;
 	}
 	else
 	{
-		if (file_lenght(k2plus_cfg) > 0)
+		if (file_lenght(k2plus_path) > 0)
 		{
-			k2_cfg = k2plus_cfg;
+			k2_file = k2pro_file;
+			k2_path = k2pro_path;
 			model_name = "K2Plus";
 			grid = 7;
 		}
 		else
 		{
-			if (file_lenght(k2max_cfg) > 0)
+			if (file_lenght(k2max_path) > 0)
 			{
-				k2_cfg = k2max_cfg;
+				k2_file = k2pro_file;
+				k2_path = k2pro_path;
 				model_name = "K2Max";
 				grid = 7;
 			}
 		}
 	}
 
+	if (cfg_path)
+		*cfg_path = k2_path;
 	if (cfg_filename)
-		*cfg_filename = k2_cfg;
+		*cfg_filename = k2_file;
 	if (grid_size)
 		*grid_size = grid;
 	if (printer_model)
 		*printer_model = model_name;
 
-	if (!k2_cfg)
+	if (!k2_path)
 	{
 		return 1;
 	}
@@ -461,6 +470,9 @@ int x_count = 0;
 int y_count = 0;
 // web page grid size
 int web_page_grid_size = 0;
+// used profile number
+int used_profile = 1;
+int saved_profile = 1;
 
 // the number of mesh accumulation in mesh_acc[]
 int mesh_accumulations = 0;
@@ -742,7 +754,7 @@ int read_mesh_from_printer_config(void)
 
 	int result = 2;
 
-	int rr = detect_printer_defaults(NULL, &k2_cfg, NULL);
+	int rr = detect_printer_defaults(NULL, &k2_cfg, NULL, NULL);
 
 	if (rr)
 	{
@@ -881,6 +893,16 @@ char *leveling_template_callback(char key)
 			static_template_ptr = "SUCCESS: The requested command has been executed!";
 			return static_template_ptr;
 		}
+		if (response_code == 9)
+		{
+			sprintf(static_template_buffer, "SUCCESS: Current printer configuration has been saved as a profile number %d.", saved_profile);
+			return static_template_buffer;
+		}
+		if (response_code == 10)
+		{
+			sprintf(static_template_buffer, "SUCCESS: Profile %d is set to be used. Please reboot the printer!", saved_profile);
+			return static_template_buffer;
+		}
 
 		// default - no response shown
 		static_template_buffer[0] = 0;
@@ -954,6 +976,36 @@ char *leveling_template_callback(char key)
 			static_template_ptr = "ERROR: SSH service is not installed!";
 			return static_template_ptr;
 		}
+		if (error_code == 14)
+		{
+			static_template_ptr = "ERROR: Invalid profile number!";
+			return static_template_ptr;
+		}
+		if (error_code == 15)
+		{
+			static_template_ptr = "ERROR: Unable to detect the printer configuration!";
+			return static_template_ptr;
+		}
+		if (error_code == 16)
+		{
+			static_template_ptr = "ERROR: Selected profile is already the current used profile!";
+			return static_template_ptr;
+		}
+		if (error_code == 17)
+		{
+			static_template_ptr = "ERROR: Cannot save this profile!";
+			return static_template_ptr;
+		}
+		if (error_code == 18)
+		{
+			static_template_ptr = "ERROR: Cannot read this profile!";
+			return static_template_ptr;
+		}
+		if (error_code == 19)
+		{
+			static_template_ptr = "ERROR: Cannot use this profile!";
+			return static_template_ptr;
+		}
 		if (error_code == 99)
 		{
 			static_template_ptr = "ERROR: Unsupported function requested!";
@@ -981,6 +1033,16 @@ char *leveling_template_callback(char key)
 		char *precision_str = get_key_value(leveling_config, "precision", "0.01");
 		double precision = atof(precision_str);
 		sprintf(static_template_buffer, "%g", precision);
+		return static_template_buffer;
+	}
+	if (key == 'H')
+	{
+		// used profile
+		char *profile_str = get_key_value(leveling_config, "used_profile", "1");
+		used_profile = atoi(profile_str);
+		if ((used_profile < 1) || (used_profile > 9))
+			used_profile = 1;
+		sprintf(static_template_buffer, "%d", used_profile);
 		return static_template_buffer;
 	}
 	if (key == 'Z')
@@ -1431,6 +1493,102 @@ void process_custom_pages(char *filename_str, char *query_str)
 				}
 			}
 		}
+		else if (!strcmp(action, "save_profile"))
+		{
+			char *profile = get_key_value(query, "profile", "0");
+			int profile_int = atoi(profile);
+			if ((profile_int >= 1) && (profile_int <= 9))
+			{
+				char dst_file[64];
+				const char *config_file;
+				const char *config_path;
+				if (!detect_printer_defaults(NULL, &config_path, &config_file, NULL))
+				{
+					// save printer*cfg
+					sprintf(dst_file, "/user/webfs/profiles/%d/%s", profile_int, config_file);
+					int r1 = custom_copy_file(config_path, dst_file, "wb", NULL);
+					// save unmodifiable.cfg
+					sprintf(dst_file, "/user/webfs/profiles/%d/unmodifiable.cfg", profile_int);
+					int r2 = custom_copy_file("/user/unmodifiable.cfg", dst_file, "wb", NULL);
+					if ((r1 == 0) && (r2 == 0))
+					{
+						saved_profile = profile_int;
+						response_code = 9;
+					}
+					else
+					{
+						error_code = 17; // error while saving the profile
+					}
+				}
+				else
+				{
+					error_code = 15; // cannot detect printer configuration
+				}
+			}
+			else
+			{
+				error_code = 14; // invalid profile number
+			}
+		}
+		else if (!strcmp(action, "use_profile"))
+		{
+			char *profile = get_key_value(query, "profile", "0");
+			int profile_int = atoi(profile);
+			if ((profile_int >= 1) && (profile_int <= 9))
+			{
+				char *profile_str = get_key_value(leveling_config, "used_profile", "1");
+				used_profile = atoi(profile_str);
+				if ((used_profile < 1) || (used_profile > 9))
+					used_profile = 1;
+				if (profile_int != used_profile)
+				{
+					char src_file1[64];
+					char src_file2[64];
+					const char *config_file;
+					const char *config_path;
+					if (!detect_printer_defaults(NULL, &config_path, &config_file, NULL))
+					{
+						sprintf(src_file1, "/user/webfs/profiles/%d/%s", profile_int, config_file);
+						sprintf(src_file2, "/user/webfs/profiles/%d/unmodifiable.cfg", profile_int);
+						if ((file_exists(src_file1)) && (file_exists(src_file2)))
+						{
+							// load printer*cfg
+							int r1 = custom_copy_file(src_file1, config_path, "wb", NULL);
+							// load unmodifiable.cfg
+							int r2 = custom_copy_file(src_file2, "/user/unmodifiable.cfg", "wb", NULL);
+							if ((r1 == 0) && (r2 == 0))
+							{
+								leveling_config = set_key_value(leveling_config, "used_profile", profile);
+								write_config_file("/user/webfs/parameters.cfg", leveling_config);
+								saved_profile = profile_int;
+								used_profile = profile_int;
+								response_code = 10;
+							}
+							else
+							{
+								error_code = 19; // cannot use this profile
+							}
+						}
+						else
+						{
+							error_code = 18; // cannot read this profile
+						}
+					}
+					else
+					{
+						error_code = 15; // cannot detect printer configuration
+					}
+				}
+				else
+				{
+					error_code = 16; // the same profile
+				}
+			}
+			else
+			{
+				error_code = 14; // invalid profile number
+			}
+		}
 		else if (!strcmp(action, "set_average"))
 		{
 			// set the average
@@ -1445,18 +1603,24 @@ void process_custom_pages(char *filename_str, char *query_str)
 				if ((mesh_grid >= MIN_SUPPORTED_GRID_SIZE) && (mesh_grid <= MAX_SUPPORTED_GRID_SIZE))
 				{
 					const char *config_file;
-					detect_printer_defaults(NULL, &config_file, NULL);
-					int avg_slots = calculate_mesh_average(mesh_grid);
-					if (avg_slots > 0)
+					if (!detect_printer_defaults(NULL, &config_file, NULL, NULL))
 					{
-						apply_precision(mesh_average, precision);
-						mesh_average_export(mesh_grid, mesh_matrix);
-						update_printer_config_file(config_file, "points", mesh_matrix);
-						response_code = 5;
+						int avg_slots = calculate_mesh_average(mesh_grid);
+						if (avg_slots > 0)
+						{
+							apply_precision(mesh_average, precision);
+							mesh_average_export(mesh_grid, mesh_matrix);
+							update_printer_config_file(config_file, "points", mesh_matrix);
+							response_code = 5;
+						}
+						else
+						{
+							error_code = 8;
+						}
 					}
 					else
 					{
-						error_code = 8;
+						error_code = 15; // cannot detect printer configuration
 					}
 				}
 			}
@@ -1489,13 +1653,19 @@ void process_custom_pages(char *filename_str, char *query_str)
 					{
 						// set the "probe_count : grid,grid"
 						const char *config_file;
-						detect_printer_defaults(NULL, &config_file, NULL);
-						char replacement_value[8];
-						sprintf(replacement_value, "%d,%d", grid_int, grid_int);
-						update_printer_config_file(config_file, "probe_count", replacement_value);
-						web_page_grid_size = grid_int;
-						error_code = 6;
-						response_code = 0;
+						if (!detect_printer_defaults(NULL, &config_file, NULL, NULL))
+						{
+							char replacement_value[8];
+							sprintf(replacement_value, "%d,%d", grid_int, grid_int);
+							update_printer_config_file(config_file, "probe_count", replacement_value);
+							web_page_grid_size = grid_int;
+							error_code = 6;
+							response_code = 0;
+						}
+						else
+						{
+							error_code = 15; // cannot detect printer configuration
+						}
 					}
 				}
 				else

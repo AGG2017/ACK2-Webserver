@@ -14,7 +14,7 @@
   <span>Grid Size (2-10): </span><input type="number" name="grid" size="3" value="{B}" min="2" max="10" />
   <input type="hidden" name="action" value="set_parameters">
   <input type="submit" value="UPDATE">
-  <span>Note: Changing the 'Grid Size' requires to clear all data slots and to reboot the printer!</span>
+  <span>Note: Changing the 'Grid Size' requires to reboot the printer!</span>
   </fieldset>
 </form>
 <form action="response.html" method="get" name="save_mesh" >
@@ -53,6 +53,23 @@
   <span><b>CLEAR ALL LEVELING DATA SLOTS:</b></span>
   <input type="hidden" name="action" value="clear_all">
   <input type="submit" value="CLEAR ALL SLOTS">
+  </fieldset>
+</form>
+<form action="response.html" method="get" name="save_profile" >
+  <fieldset>
+  <span><b>SAVE CURRENT CONFIGURATION AS A PROFILE:</b></span>
+  <span>Profile number (1-9): </span><input type="number" name="profile" size="3" value="{G}" min="1" max="9" />
+  <input type="hidden" name="action" value="save_profile">
+  <input type="submit" value="SAVE AS PROFILE">
+  </fieldset>
+</form>
+<form action="response.html" method="get" name="use_profile" >
+  <fieldset>
+  <span><b>USE A PROFILE AS CURRENT CONFIGURATION:</b></span>
+  <span>Profile number (1-9): </span><input type="number" name="profile" size="3" value="{H}" min="1" max="9" />
+  <input type="hidden" name="action" value="use_profile">
+  <input type="submit" value="USE THIS PROFILE">
+  <span>Note: Setting a new profile requires to reboot the printer!</span>
   </fieldset>
 </form>
 <form action="response.html" method="get" name="reboot" >
