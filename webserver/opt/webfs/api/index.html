@@ -69,6 +69,11 @@
             document
               .getElementById("status-container")
               .appendChild(cpuidleElement);
+
+            // Display SSH status
+            const sshElement = document.createElement("div");
+            sshElement.textContent = `SSH Status: ${data.ssh_status}`;
+            document.getElementById("status-container").appendChild(sshElement);
           })
           .catch((error) => {
             console.error("Error fetching status:", error);

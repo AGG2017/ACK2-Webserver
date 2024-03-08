@@ -859,6 +859,25 @@ config_option_t leveling_config = NULL;
 int error_code;
 int response_code;
 
+int get_ssh_status(void)
+{
+	int ssh_status = 0; // not installed
+	if (file_exists("/opt/etc/init.d/S51dropbear"))
+	{
+		system_buffer[0] = 0;
+		system_with_output("pidof dropbear", 1);
+		if ((system_buffer[0] >= '0') && (system_buffer[0] <= '9'))
+		{
+			ssh_status = 2; // started
+		}
+		else
+		{
+			ssh_status = 1; // stopped
+		}
+	}
+	return ssh_status;
+}
+
 // update /mnt/UDISK/webfs/api/info.json
 int update_api(void)
 {
@@ -880,9 +899,54 @@ int update_api(void)
 		cpu_sys_use = (t2 * 100) / (t0 + t2 + t3);
 		cpu_idle = (t3 * 100) / (t0 + t2 + t3);
 	}
-	sprintf(static_template_buffer, "{\"api_ver\":1, \"total_mem\":%d, \"free_mem\":%d, \"free_mem_per\":%d, \"cpu_use\":%d, \"cpu_usr_use\":%d, \"cpu_sys_use\":%d, \"cpu_idle\":%d}", total_mem, free_mem, free_mem_per, cpu_use, cpu_usr_use, cpu_sys_use, cpu_idle);
+	int ssh_status = get_ssh_status();
+	sprintf(static_template_buffer, "{\"api_ver\":1, \"total_mem\":%d, \"free_mem\":%d, \"free_mem_per\":%d, \"cpu_use\":%d, \"cpu_usr_use\":%d, \"cpu_sys_use\":%d, \"cpu_idle\":%d, \"ssh_status\":%d}", total_mem, free_mem, free_mem_per, cpu_use, cpu_usr_use, cpu_sys_use, cpu_idle, ssh_status);
 	// export buffer to file
 	return custom_copy_file(NULL, "/mnt/UDISK/webfs/api/info.json", "wb", static_template_buffer);
+}
+
+// process action query and update /mnt/UDISK/webfs/api/do.json
+int control_api(config_option_t query)
+{
+	int result = -1;
+	char *action = get_key_value(query, "action", "unknown");
+	if (!strcmp(action, "reboot"))
+	{
+		system_with_output("reboot", 1);
+		result = 1;
+	}
+	if (!strcmp(action, "ssh_start"))
+	{
+		int ssh = get_ssh_status();
+		result = 0;
+		if (ssh == 1)
+		{
+			system_with_output("/opt/etc/init.d/S51dropbear start 2>&1", 1);
+			result = 2;
+		}
+		else
+		{
+			if (ssh == 2)
+				result = 2;
+		}
+	}
+	if (!strcmp(action, "ssh_stop"))
+	{
+		int ssh = get_ssh_status();
+		result = 0;
+		if (ssh == 2)
+		{
+			system_with_output("/opt/etc/init.d/S51dropbear stop 2>&1", 1);
+			result = 1;
+		}
+		else
+		{
+			if (ssh == 1)
+				result = 1;
+		}
+	}
+	sprintf(static_template_buffer, "{\"api_ver\":1, \"result\":%d}", result);
+	return custom_copy_file(NULL, "/mnt/UDISK/webfs/api/do.json", "wb", static_template_buffer);
 }
 
 char *leveling_template_callback(char key)
@@ -1398,6 +1462,12 @@ void process_custom_pages(char *filename_str, char *query_str)
 	if ((!strcmp(filename_str, "/mnt/UDISK/webfs/api/info.json")))
 	{
 		update_api();
+	}
+
+	// ----------------------------- access to the do.json file -----------------------------
+	if ((!strcmp(filename_str, "/mnt/UDISK/webfs/api/do.json")))
+	{
+		control_api(query);
 	}
 
 	// ----------------------------- access to the tools index.html -------------------------
