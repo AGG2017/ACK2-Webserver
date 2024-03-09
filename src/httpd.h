@@ -26,8 +26,7 @@
 
 #define RFC1123 "%a, %d %b %Y %H:%M:%S GMT"
 
-struct DIRCACHE
-{
+struct DIRCACHE {
     char path[1024];
     char mtime[40];
     time_t add;
@@ -39,8 +38,7 @@ struct DIRCACHE
     struct DIRCACHE *next;
 };
 
-struct REQUEST
-{
+struct REQUEST {
     int fd;      /* socket handle */
     int state;   /* what to to ??? */
     time_t ping; /* last read/write (for timeouts) */
@@ -97,16 +95,14 @@ struct REQUEST
 
 /* --- string lists --------------------------------------------- */
 
-struct strlist
-{
+struct strlist {
     struct strlist *next;
     char *line;
     int free_the_mallocs;
 };
 
 /* add element (list head) */
-static void inline list_add(struct strlist **list, char *line, int free_the_mallocs)
-{
+static void inline list_add(struct strlist **list, char *line, int free_the_mallocs) {
     struct strlist *elem = malloc(sizeof(struct strlist));
     memset(elem, 0, sizeof(struct strlist));
     elem->next = *list;
@@ -116,12 +112,10 @@ static void inline list_add(struct strlist **list, char *line, int free_the_mall
 }
 
 /* free whole list */
-static void inline list_free(struct strlist **list)
-{
+static void inline list_free(struct strlist **list) {
     struct strlist *elem, *next;
 
-    for (elem = *list; NULL != elem; elem = next)
-    {
+    for (elem = *list; NULL != elem; elem = next) {
         next = elem->next;
         if (elem->free_the_mallocs)
             free(elem->line);
@@ -153,8 +147,7 @@ void xperror(int loglevel, char *txt, char *peerhost);
 void xerror(int loglevel, char *txt, char *peerhost);
 int file_exists(const char *filename);
 
-static void inline close_on_exec(int fd)
-{
+static void inline close_on_exec(int fd) {
 }
 
 /* --- request.c ------------------------------------------------ */
@@ -200,8 +193,7 @@ int v_capture_image(const char *v_filename, int v_frame_count);
 typedef struct config_option config_option;
 typedef config_option *config_option_t;
 
-struct config_option
-{
+struct config_option {
     config_option_t prev;
     char key[CONFIG_KEY_MAX_BYTES];
     char value[CONFIG_VALUE_MAX_BYTES];
