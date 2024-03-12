@@ -2,12 +2,12 @@
 <html>
 <head>
   <title>AK2 Custom webserver</title>
-  <link rel="stylesheet" type="text/css" href="style/style.css" title="style" />
-    <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" type="text/css" href="/style/style.css" title="style" />
+    <link rel="icon" type="image/png" href="/favicon.png">
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   function fetchData() {
-    fetch('api/info.json')
+    fetch('/api/info.json')
       .then(response => response.json())
       .then(data => {
         document.getElementById('totalMemory').textContent = Math.round(data.total_mem / 1024 / 1024) + 'MB';                                                
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(error => console.error('Error fetching data:', error));
 
-    fetch('api/webserver.json')
+    fetch('/api/webserver.json')
       .then(response => response.json())
       .then(data => {
         document.getElementById('printerModel').textContent = data.printer_model;
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(error => console.error('Error fetching data:', error));
 
-    fetch('api/webserver.json')
+    fetch('/api/webserver.json')
       .then(response => response.json())
       .then(data => {
         const unleashedUrl = data.mqtt_webui_url;
@@ -57,10 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <ul id="menu">
           <li class="selected"><a href="/index.html">Home</a></li>
 		      <li><a id="unleashedLink" href="#">Kobra Unleashed</a></li>
-          <li><a href="webcam/index.html">Webcam</a></li>
-          <li><a href="tools/index.html">Leveling tools</a></li>
-          <li><a href="mesh/index.html">Mesh visualizer</a></li>
-		  <li><a href="files/">Files</a></li>
+          <li><a href="/webcam/index.html">Webcam</a></li>
+          <li><a href="/tools/index.html">Leveling tools</a></li>
+          <li><a href="/mesh/index.html">Mesh visualizer</a></li>
+		  <li><a href="/files">Files</a></li>
         </ul>
       </div>
     </div>
@@ -114,8 +114,10 @@ document.addEventListener('DOMContentLoaded', function() {
   <tr>
     <th>SSH Status</th>
     <td><span id="sshStatus"></span></td>
-  </tr>
+
 </table>
+ <a href="/logviewer/index.html">View printer Log</a>
+
 </div>
       </div>
       <div id="content">
