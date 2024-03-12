@@ -1,65 +1,65 @@
-</textarea>
-<center>
-    <button id="graph-button" style="margin-top:10px; font-size: 20px;">Visualize</button>
-</center>
-<script>
-    function onGraphReady(){
-        var gb = document.getElementById("graph-button");
-        gb.textContent = "Visualize";
-        gb.addEventListener("click",initGraph,false);
-    }
-    function initGraph() {
-        document.getElementById('graph').style.display = 'block';
-        var raw_data = document.getElementById('data').value.split('\n');
-        if (raw_data[0].trim().match(/^0\s+[\s\d]+\d$/)) raw_data.shift();
-        for (var i in raw_data) {
+</textarea><br>
+        <div id="graph"></div>
+<br><button id="graph-button" onclick="initGraph()" style="float: left; margin-right: 10px;">Click to visualize</button>
+      </div>
+
+      <script>
+        function initGraph() {
+          document.getElementById('graph').style.display = 'block';
+          var raw_data = document.getElementById('data').value.split('\n');
+          if (raw_data[0].trim().match(/^0\s+[\s\d]+\d$/)) raw_data.shift();
+          for (var i in raw_data) {
             raw_data[i] = raw_data[i].trim().replace(/< \d+:\d+:\d+(\s+(AM|PM))?:/g, '').replace(/[\[\]]/g, ' ').replace(/\s+/g, '\t').split('\t');
             if (raw_data[i][0] == i) raw_data[i].shift();
-        }
-        var data = [{
+          }
+          var data = [{
             z: raw_data,
             type: 'surface',
             contours: {
-                z: {
-                    show: true,
-                    usecolormap: true,
-                    highlightcolor: "#42f462",
-                    project: {
-                        z: true
-                    }
+              z: {
+                show: true,
+                usecolormap: true,
+                highlightcolor: "#42f462",
+                project: {
+                  z: true
                 }
+              }
             }
-        }];
-        var layout = {
-            //title: 'Bed Leveling Mesh',
+          }];
+          var layout = {
             autosize: true,
             margin: {
-                l: 0,
-                r: 0,
-                b: 0,
-                t: 0,
+              l: 0,
+              r: 0,
+              b: 0,
+              t: 0,
             },
             scene: {
-                zaxis: {
-                    autorange: false,
-                    range: [-1, 1]
-                },
-                camera: {
-                    eye: {
-                        x: 0,
-                        y: -1.25,
-                        z: 1.25
-                    }
+              zaxis: {
+                autorange: false,
+                range: [-1, 1]
+              },
+              camera: {
+                eye: {
+                  x: 0,
+                  y: -1.25,
+                  z: 1.25
                 }
+              }
             }
-        };
-        Plotly.newPlot('graph', data, layout, {
+          };
+          Plotly.newPlot('graph', data, layout, {
             responsive: true
-        });
-    }
-</script>
-<div id="graph" style="width: 100%; height: 600px; display: none;"></div>
-<script src="plotly-1.58.4.min.js" async="async" onload="onGraphReady()"></script>
-<a href="javascript:history.back()">Go Back</a>
-<a href="/">HOME</a>
-</body></html>
+          });
+        }
+      </script>
+
+      <!-- end plot -->
+    </div>
+  </div>
+  <div id="footer">
+    The Custom Webserver was created and it is maintained by AGG2017 and other team members.
+  </div>
+</div>
+</body>
+</html>

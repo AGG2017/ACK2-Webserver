@@ -1,64 +1,136 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ACK2 Webserver</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-  </head>
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>AK2 Custom webserver</title>
+  <link rel="stylesheet" type="text/css" href="style/style.css" title="style" />
+    <link rel="icon" type="image/png" href="favicon.png">
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function fetchData() {
+    fetch('api/info.json')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('totalMemory').textContent = data.total_mem;
+        document.getElementById('freeMemory').textContent = data.free_mem;
+        document.getElementById('freeMemoryPercentage').textContent = data.free_mem_per + '%';
+        document.getElementById('cpuTotalUsage').textContent = data.cpu_use;
+        document.getElementById('cpuUserUsage').textContent = data.cpu_usr_use;
+        document.getElementById('cpuSystemUsage').textContent = data.cpu_sys_use;
+        document.getElementById('cpuIdle').textContent = data.cpu_idle;
+        document.getElementById('sshStatus').textContent = (data.ssh_status==2) ? 'Started' : ((data.ssh_status==1) ? 'Stopped' : 'N/A');
+      })
+      .catch(error => console.error('Error fetching data:', error));
 
-  <body onunload="">
-    <a name="top"></a>
+    fetch('api/webserver.json')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('printerModel').textContent = data.printer_model;
+        document.getElementById('fwVersion').textContent = data.update_version;
+        document.getElementById('unleashedUrl').textContent = data.mqtt_webui_url;
+      })
+      .catch(error => console.error('Error fetching data:', error));
 
-    <header>
-      <nav>
-        <a href="/index.html" class="current">Home</a>
-        <a href="/webcam/index.html">WebCam</a>
-        <a href="/mesh/index.html">3D Mesh</a>
-        <a href="/tools/index.html">Tools</a>
-        <a href="/files">Files</a>
-        <a href="/api/index.html">Status</a>
-      </nav>
+    fetch('api/webserver.json')
+      .then(response => response.json())
+      .then(data => {
+        const unleashedUrl = data.mqtt_webui_url;
+        const unleashedLink = document.getElementById('unleashedLink');
+        unleashedLink.href = unleashedUrl;
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }
+  fetchData();
+  setInterval(fetchData, 1000);
+});
+</script>
 
-      <h1>Anycubic K2 Custom Webserver</h1>
-    </header>
-
-    <main>
-      <p>
-        The closed source 3D printers provide limited options for the end user restricted to the one the software designer has in his mind.
-        No options are provided to add new functionalities or to modify the existing one. You cannot use your ideas for product improvements.
-      </p>
-
-      <p>
-        We tried to fill these gaps in the developed Custom Webserver. The extra features added aren't many yet, but it's just the beginning.
-        It is a highly optimized Webserver that uses system resources such as memory with less than 1%, and the CPU load is minimal and only when there are web page requests.
-      </p>
-
-      <div class="notice">
-        <p>
-          <b
-            ><span style="font-size: 1.4rem"
-              >Help support this project</span
-            ></b
-          ><br /><br />
-          It takes a lot of work to run this project. We rely on the kind work
-          of a couple of great volunteers. Any help will be greatly appreciated.
-        </p>
+</head>
+<body>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+          <h1><a href="index.html">AK2<span class="logo_colour"> Custom Webserver</span></a></h1>
+        </div>
       </div>
-      <p><br /></p>
-      <div class="centre">
-        <a class="button" href="https://github.com/AGG2017/ACK2-Webserver">View project page for more details</a>
+      <div id="menubar">
+        <ul id="menu">
+          <li class="selected"><a href="/index.html">Home</a></li>
+		      <li><a id="unleashedLink" href="#">Kobra Unleashed</a></li>
+          <li><a href="webcam/index.html">Webcam</a></li>
+          <li><a href="tools/index.html">Leveling tools</a></li>
+          <li><a href="mesh/index.html">Mesh visualizer</a></li>
+		  <li><a href="files/">Files</a></li>
+        </ul>
       </div>
+    </div>
+    <div id="site_content">
+      <div class="sidebar">
+        <h3>Printer resources</h3>
+		<div class="table-container">
+  <table>
+    <tbody>
+      <tr>
+      </tr>
+      <tr>
+        <td><strong>Total Memory:</strong></td>
+        <td><span id="totalMemory"></span></td>
+      </tr>
+      <tr>
+        <td><strong>Free Memory:</strong></td>
+        <td><span id="freeMemory"></span></td>
+      </tr>
+      <tr>
+        <td><strong>Free Memory %:</strong></td>
+        <td><span id="freeMemoryPercentage"></span></td>
+      </tr>
+      <tr>
+        <td><strong>CPU Total Usage:</strong></td>
+        <td><span id="cpuTotalUsage"></span></td>
+      </tr>
+      <tr>
+        <td><strong>CPU User Usage:</strong></td>
+        <td><span id="cpuUserUsage"></span></td>
+      </tr>
+      <tr>
+        <td><strong>CPU System Usage:</strong></td>
+        <td><span id="cpuSystemUsage"></span></td>
+      </tr>
+      <tr>
+        <td><strong>CPU Idle:</strong></td>
+        <td><span id="cpuIdle"></span></td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+  <tr>
+    <th>Printer Model</th>
+    <td id="printerModel"></td>
+  </tr>
+  <tr>
+    <th>Firmware Version</th>
+    <td id="fwVersion"></td>
+  </tr>
+  <tr>
+    <th>SSH Status</th>
+    <td><span id="sshStatus"></span></td>
+  </tr>
+</table>
+</div>
       </div>
-    </main>
+      <div id="content">
+        <h1>About this project</h1>
+       <p>The closed source 3D printers provide limited options for the end user restricted to the one the software designer has in his mind. No options are provided to add new functionalities or to modify the existing one. You cannot use your ideas for product improvements.
 
-    <footer>
-      <p>
-        The Custom Webserver was created and it is maintained by AGG2017 and other team members.
-      </p>
+We tried to fill these gaps in the developed Custom Webserver. The extra features added aren't many yet, but it's just the beginning. It is a highly optimized Webserver that uses system resources such as memory with less than 1%, and the CPU load is minimal and only when there are web page requests.</p><br>
+<br><h1>Help support this project</h1>
 
-      <a href="#top">TOP</a>
-    </footer>
-  </body>
+It takes a lot of work to run this project. <br> We rely on the kind work of a couple of great volunteers. Any help will be greatly appreciated. <a href="https://github.com/AGG2017/ACK2-Webserver"><br><br>AK2 Custom webserver on GIT</a></p>
+      </div>
+    </div>
+    <div id="footer">
+             The Custom Webserver was created and it is maintained by AGG2017 and other team members.
+    </div>
+  </div>
+</body>
 </html>

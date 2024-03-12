@@ -1,14 +1,55 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>TOOLS</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-</head>		
-<body style="background-color:rgb(240, 213, 233);" onunload="">
-<center><p style="color: red; padding: 0 10px;">{#}</p></center>
-<center><h2>TOOLS</h2></center>
-<form action="response.html" method="get" name="set_parameters" >
+  <title>AK2 Custom webserver</title>
+  <link rel="stylesheet" type="text/css" href="/style/style.css" title="style" />
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+  
+    fetch('/api/webserver.json')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('unleashedUrl').textContent = data.mqtt_webui_url;
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  
+    fetch('/api/webserver.json')
+      .then(response => response.json())
+      .then(data => {
+        const unleashedUrl = data.mqtt_webui_url;
+        const unleashedLink = document.getElementById('unleashedLink');
+        unleashedLink.href = unleashedUrl;
+      })
+      .catch(error => console.error('Error fetching data:', error));
+    });
+   
+  </script>
+</head>
+<body>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+          <h1><a href="index.html">AK2<span class="logo_colour"> Custom Webserver</span></a></h1>
+        </div>
+      </div>
+      <div id="menubar">
+        <ul id="menu">
+          <li><a href="/index.html">Home</a></li>
+		      <li><a id="unleashedLink" href="#">Kobra Unleashed</a></li>
+          <li><a href="/webcam/index.html">Webcam</a></li>
+          <li class="selected"><a href="/tools/index.html">Leveling tools</a></li>
+          <li><a href="/mesh/index.html">Mesh visualizer</a></li>
+		      <li><a href="/files">Files</a></li>
+        </ul>
+      </div>
+    </div>
+    <div id="site_content">
+	<h2>Mesh leveling tools</h2>
+       <form action="response.html" method="get" name="set_parameters" >
   <fieldset>
+ 
   <span><b>SELECT PARAMETERS:</b></span></span></span>
   <span>Average Precision: </span><input type="number" name="precision" size="7" value="{A}" step="0.0001" min="0.0001" max="0.1" />
   <span>Grid Size (2-10): </span><input type="number" name="grid" size="3" value="{B}" min="2" max="10" />
@@ -26,7 +67,7 @@
   <input type="submit" value="SAVE CURRENT MESH">
   </fieldset>
 </form>
-<form action="../mesh/index.html" method="get" name="slot3d" >
+<form action="/mesh/index.html" method="get" name="slot3d" >
 <fieldset>
 <span><b>3D VISUALIZATION OF SELECTED DATA SLOT:</b></span>
 <span>Select Data Slot (1-99): </span><input type="number" name="source" size="3" value="" min="1" max="99" />	
@@ -70,7 +111,7 @@
   <span>Profile number (1-9): </span><input type="number" name="profile" size="3" value="{H}" min="1" max="9" />
   <input type="hidden" name="action" value="use_profile">
   <input type="submit" value="USE THIS PROFILE">
-  <span>Note: Setting a new profile requires to reboot the printer!</span>
+  <span><br>Note: Setting a new profile requires to reboot the printer!</span>
   </fieldset>
 </form>
 <form action="response.html" method="get" name="reboot" >
@@ -80,28 +121,29 @@
   <input type="submit" value="REBOOT">
   </fieldset>
 </form>
-<form action="response.html" method="get" name="ssh_start" >
+<form action="response.html" method="get" name="ssh_start" style="display: inline-block;">
   <fieldset>
-  <span><b>SSH:</b></span>
-  <input type="hidden" name="action" value="ssh_start">
-  <input type="submit" value="START">
+    <span><b>SSH:</b></span>
+    <input type="hidden" name="action" value="ssh_start">
+    <input type="submit" value="START">
   </fieldset>
 </form>
-<form action="response.html" method="get" name="ssh_stop" >
+<form action="response.html" method="get" name="ssh_stop" style="display: inline-block;">
   <fieldset>
-  <span><b>SSH:</b></span>
-  <input type="hidden" name="action" value="ssh_stop">
-  <input type="submit" value="STOP">
+    <span><b>SSH:</b></span>
+    <input type="hidden" name="action" value="ssh_stop">
+    <input type="submit" value="STOP">
   </fieldset>
 </form>
-<form action="response.html" method="get" name="ssh_status" >
+<form action="response.html" method="get" name="ssh_status" style="display: inline-block;">
   <fieldset>
-  <span><b>SSH:</b></span>
-  <input type="hidden" name="action" value="ssh_status">
-  <input type="submit" value="STATUS">
+    <span><b>SSH:</b></span>
+    <input type="hidden" name="action" value="ssh_status">
+    <input type="submit" value="STATUS">
   </fieldset>
 </form>
-<form action="../mesh/index.html" method="get" name="config" >
+
+<form action="/mesh/index.html" method="get" name="config" >
 <fieldset>
 <p>Current Mesh Data (Z-offset = {Z} mm):</p>
 <textarea style="font-family: monospace; overflow: auto; width:100%;" cols="200" rows="5" wrap="off">{E}</textarea>
@@ -109,7 +151,7 @@
 <input type="submit" value="3D VISUALIZATION">                                                                       
 </fieldset>
 </form> 
-<form action="../mesh/index.html" method="get" name="average" >
+<form action="/mesh/index.html" method="get" name="average" >
 <fieldset>
 <p>Average Mesh Data (based on {X} data slots):</p>
 <textarea style="font-family: monospace; overflow: auto; width:100%;" cols="200" rows="5" wrap="off">{F}</textarea>
@@ -117,6 +159,10 @@
 <input type="submit" value="3D VISUALIZATION">
 </fieldset>
 </form>
-<a href="/index.html">HOME</a>
+      </div>
+    </div>
+    <div id="footer">
+             The Custom Webserver was created and it is maintained by AGG2017 and other team members.
+    </div>
 </body>
 </html>

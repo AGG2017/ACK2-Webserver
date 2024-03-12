@@ -1,1 +1,80 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Live Image Stream</title><script>function refreshImage() {var img = document.getElementById('live-image');img.src = img.src.split('?')[0] + '?' + new Date().getTime();}setInterval(refreshImage, 2000);</script></head><body onunload=""><img id="live-image" src="cam.jpg" alt="Live stream image"><div><a href="/index.html">HOME</a></body></div></html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AK2 Custom webserver - Live Webcam</title>
+    <link rel="icon" type="image/png" href="../favicon.png" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="../style/style.css"
+      title="style"
+    />
+    <script>
+      function refreshImage() {
+        var img = document.getElementById("live-image");
+        img.src = img.src.split("?")[0] + "?" + new Date().getTime();
+      }
+      setInterval(refreshImage, 2000);
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/webserver.json")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("unleashedUrl").textContent =
+              data.mqtt_webui_url;
+          })
+          .catch((error) => console.error("Error fetching data:", error));
+
+        fetch("/api/webserver.json")
+          .then((response) => response.json())
+          .then((data) => {
+            const unleashedUrl = data.mqtt_webui_url;
+            const unleashedLink = document.getElementById("unleashedLink");
+            unleashedLink.href = unleashedUrl;
+          })
+          .catch((error) => console.error("Error fetching data:", error));
+      });
+    </script>
+  </head>
+  <body>
+    <div id="main">
+      <div id="header">
+        <div id="logo">
+          <div id="logo_text">
+            <h1>
+              <a href="index.html"
+                >AK2<span class="logo_colour"> Custom Webserver</span></a
+              >
+            </h1>
+          </div>
+        </div>
+        <div id="menubar">
+          <ul id="menu">
+            <li><a href="/index.html">Home</a></li>
+            <li><a id="unleashedLink" href="#">Kobra Unleashed</a></li>
+            <li class="selected"><a href="/webcam/index.html">Webcam</a></li>
+            <li><a href="/tools/index.html">Leveling tools</a></li>
+            <li><a href="/mesh/index.html">Mesh visualizer</a></li>
+            <li><a href="/files">Files</a></li>
+          </ul>
+        </div>
+      </div>
+      <div id="site_content">
+        <h2>AK2 Live Webcam</h2>
+        <div style="text-align: center; border: 5px solid black">
+          <img
+            id="live-image"
+            src="cam.jpg"
+            alt="Live stream image"
+            style="width: 640px; height: 480px"
+          />
+        </div>
+      </div>
+      <div id="footer">
+        The Custom Webserver was created and it is maintained by AGG2017 and
+        other team members.
+      </div>
+    </div>
+  </body>
+</html>
