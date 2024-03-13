@@ -61,5 +61,19 @@
     The Custom Webserver was created and it is maintained by AGG2017 and other team members.
   </div>
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    function fetchData() {
+      fetch("/api/webserver.json")
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("unleashedLink").href =
+            data.mqtt_webui_url;
+        })
+        .catch((error) => console.error("Error fetching data:", error));
+    }
+    fetchData();
+  });
+</script>
 </body>
 </html>

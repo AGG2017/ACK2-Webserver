@@ -84,6 +84,7 @@ struct REQUEST {
     struct stat bst; /* file info */
     char mtime[40];  /* RFC 1123 */
     char ctime[40];  /* RFC 1123 */
+    char cache_turn_off;
     off_t written;
     int head_only;
     int rh, rb;

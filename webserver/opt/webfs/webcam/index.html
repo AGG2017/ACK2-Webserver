@@ -16,26 +16,6 @@
       }
       setInterval(refreshImage, 2000);
     </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        fetch("/api/webserver.json")
-          .then((response) => response.json())
-          .then((data) => {
-            document.getElementById("unleashedUrl").textContent =
-              data.mqtt_webui_url;
-          })
-          .catch((error) => console.error("Error fetching data:", error));
-
-        fetch("/api/webserver.json")
-          .then((response) => response.json())
-          .then((data) => {
-            const unleashedUrl = data.mqtt_webui_url;
-            const unleashedLink = document.getElementById("unleashedLink");
-            unleashedLink.href = unleashedUrl;
-          })
-          .catch((error) => console.error("Error fetching data:", error));
-      });
-    </script>
   </head>
   <body>
     <div id="main">
@@ -76,5 +56,19 @@
         other team members.
       </div>
     </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        function fetchData() {
+          fetch("/api/webserver.json")
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("unleashedLink").href =
+                data.mqtt_webui_url;
+            })
+            .catch((error) => console.error("Error fetching data:", error));
+        }
+        fetchData();
+      });
+    </script>
   </body>
 </html>

@@ -1185,10 +1185,10 @@ int update_printer_config_file(const char *config_file, const char *parameter_na
 
 //==============================================================================================================================
 // CUSTOM PAGES
-void process_custom_pages(char *filename_str, char *query_str) {
+void process_custom_pages(char *filename_str, struct REQUEST *req) {
     // parse the query
     config_option_t query, co;
-    query = read_config_file_from_get_request(query_str);
+    query = read_config_file_from_get_request(req->query);
 
     // parse the configuration file if not already done
     if (!leveling_config) {
@@ -1207,6 +1207,9 @@ void process_custom_pages(char *filename_str, char *query_str) {
 
     // ----------------------------- access to the 3d visualizer index.html -----------------------------
     if ((!strcmp(filename_str, "/mnt/UDISK/webfs/mesh/index.html"))) {
+        // turn off the cache
+        req->cache_turn_off = 'Y';
+
         int rr = read_mesh_from_printer_config();
 
         if (rr == 1) {
@@ -1247,6 +1250,9 @@ void process_custom_pages(char *filename_str, char *query_str) {
 
     // ----------------------------- access to the cam.jpg file -----------------------------
     if ((!strcmp(filename_str, "/mnt/UDISK/webfs/webcam/cam.jpg"))) {
+        // turn off the cache
+        req->cache_turn_off = 'Y';
+
         // capture one frame to the file "/mnt/UDISK/webfs/webcam/cam.jpg"
         remove("/mnt/UDISK/webfs/webcam/cam.jpg");
         int result = v_capture_image("/mnt/UDISK/webfs/webcam/cam.tmp", 1);
@@ -1259,11 +1265,17 @@ void process_custom_pages(char *filename_str, char *query_str) {
 
     // ----------------------------- access to the api.json file ----------------------------
     if ((!strcmp(filename_str, "/mnt/UDISK/webfs/api/info.json"))) {
+        // turn off the cache
+        req->cache_turn_off = 'Y';
+
         update_api();
     }
 
     // ----------------------------- access to the do.json file -----------------------------
     if ((!strcmp(filename_str, "/mnt/UDISK/webfs/api/do.json"))) {
+        // turn off the cache
+        req->cache_turn_off = 'Y';
+
         control_api(query);
     }
 
@@ -1271,6 +1283,9 @@ void process_custom_pages(char *filename_str, char *query_str) {
     if ((!strcmp(filename_str, "/mnt/UDISK/webfs/tools/index.html"))) {
         response_code = 0;
         error_code = 0;
+
+        // turn off the cache
+        req->cache_turn_off = 'Y';
 
         // calculate all needed data for the template
         int rr = read_mesh_from_printer_config();
@@ -1304,6 +1319,9 @@ void process_custom_pages(char *filename_str, char *query_str) {
         // set no error and no information messages
         response_code = 0;
         error_code = 0;
+
+        // turn off the cache
+        req->cache_turn_off = 'Y';
 
         // check the requested action first
         char *action = get_key_value(query, "action", "unknown");
@@ -2115,8 +2133,10 @@ void parse_request(struct REQUEST *req) {
                        req->path);
     }
 
+    req->cache_turn_off = 'N';
+
     // process the custom pages
-    process_custom_pages(filename, req->query);
+    process_custom_pages(filename, req);
 
     h = filename + len - 1;
     if (*h == '/') {
@@ -2209,19 +2229,16 @@ regular_file:
     /* it is /really/ a regular file */
 
     req->mime = get_mime(filename);
-    if (debug) {
-        fprintf(stderr, "+++ req->mime: %s\n", req->mime);
-    }
-    // strftime(req->mtime, sizeof(req->mtime), RFC1123, gmtime(&req->bst.st_mtime));
+
     //  current time
     time_t curtime;
     time(&curtime);
-    strftime(req->mtime, sizeof(req->mtime), RFC1123, localtime(&curtime));
-    strftime(req->ctime, sizeof(req->mtime), RFC1123, localtime(&curtime));
-    if (debug) {
-        fprintf(stderr, "+++ req->mtime: %s\n", req->mtime);
-        // "Thu, 01 Jan 1970 00:00:11 GMT"
+    if (req->cache_turn_off == 'Y') {
+        strftime(req->mtime, sizeof(req->mtime), RFC1123, localtime(&curtime));
+    } else {
+        strftime(req->mtime, sizeof(req->mtime), RFC1123, gmtime(&req->bst.st_mtime));
     }
+    strftime(req->ctime, sizeof(req->mtime), RFC1123, localtime(&curtime));
     if (NULL != req->if_range && 0 != strcmp(req->if_range, req->mtime))
         /* mtime mismatch -> no ranges */
         req->ranges = 0;

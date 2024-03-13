@@ -274,6 +274,8 @@ void mkheader(struct REQUEST *req, int status) {
     }
     if (req->mtime[0] != '\0') {
         req->lres += sprintf(req->hres + req->lres, "Last-Modified: %s\r\n", req->mtime);
+    }
+    if (req->cache_turn_off == 'Y') {
         req->lres += sprintf(req->hres + req->lres, "Cache-Control: private, no-cache, no-store, must-revalidate, max-age=0, proxy-revalidate, s-maxage=0\r\n");
         req->lres += sprintf(req->hres + req->lres, "Pragma: no-cache\r\n");
         req->lres += sprintf(req->hres + req->lres, "Expires: 0\r\n");
