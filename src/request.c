@@ -1205,6 +1205,16 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
         fprintf(stderr, "+++ requested file: %s\n", filename_str);
     }
 
+    if ((strstr(filename_str, "/mnt/UDISK/webfs/files/"))) {
+        // turn off the cache for the files folder
+        req->cache_turn_off = 'Y';
+    }
+
+    if ((strstr(filename_str, "/mnt/UDISK/webfs/api/"))) {
+        // turn off the cache for the api folder
+        req->cache_turn_off = 'Y';
+    }
+
     // ----------------------------- access to the 3d visualizer index.html -----------------------------
     if ((!strcmp(filename_str, "/mnt/UDISK/webfs/mesh/index.html"))) {
         // turn off the cache
@@ -1246,6 +1256,7 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
                 }
             }
         }
+        goto e_x_i_t;
     }
 
     // ----------------------------- access to the cam.jpg file -----------------------------
@@ -1261,6 +1272,7 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
             custom_copy_file("/mnt/UDISK/webfs/webcam/default.jpg", "/mnt/UDISK/webfs/webcam/cam.tmp", "wb", NULL);
         }
         rename("/mnt/UDISK/webfs/webcam/cam.tmp", "/mnt/UDISK/webfs/webcam/cam.jpg");
+        goto e_x_i_t;
     }
 
     // ----------------------------- access to the api.json file ----------------------------
@@ -1269,6 +1281,7 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
         req->cache_turn_off = 'Y';
 
         update_api();
+        goto e_x_i_t;
     }
 
     // ----------------------------- access to the do.json file -----------------------------
@@ -1277,6 +1290,7 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
         req->cache_turn_off = 'Y';
 
         control_api(query);
+        goto e_x_i_t;
     }
 
     // ----------------------------- access to the tools index.html -------------------------
@@ -1312,6 +1326,7 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
         remove("/mnt/UDISK/webfs/tools/index.html");
         int rrr = populate_template_file("/opt/webfs/tools/index.html", "/mnt/UDISK/webfs/tools/index.tmp", leveling_template_callback);
         rename("/mnt/UDISK/webfs/tools/index.tmp", "/mnt/UDISK/webfs/tools/index.html");
+        goto e_x_i_t;
     }
 
     // process all actions from /leveling/index.html and go back to the index.html
@@ -1562,7 +1577,10 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
         remove("/mnt/UDISK/webfs/tools/response.html");
         int rrr = populate_template_file("/opt/webfs/tools/response.html", "/mnt/UDISK/webfs/tools/response.tmp", leveling_template_callback);
         rename("/mnt/UDISK/webfs/tools/response.tmp", "/mnt/UDISK/webfs/tools/response.html");
+        goto e_x_i_t;
     }
+
+e_x_i_t:
 
     // free the config file, will keep it forever in memory
     // free_config_file(leveling_config);
