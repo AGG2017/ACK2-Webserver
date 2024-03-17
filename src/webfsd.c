@@ -37,7 +37,6 @@ int tcp_port = 0;
 int max_dircache = 128;
 char *cors = NULL;
 char *doc_root = "/mnt/UDISK/webfs";
-const char *doc_root_ver = "/mnt/UDISK/webfs/ver_005_3";
 char *indexhtml = "index.html";
 char *listen_ip = NULL;
 char *listen_port = "8000";
@@ -186,9 +185,12 @@ static void create_root_doc_if_required(void) {
         }
     }
 
-    if (file_exists(doc_root_ver)) {
-        // doc root exists, exit
-        return;
+    if (file_exists("/mnt/UDISK/webfs/index.html")) {
+        // doc root exists
+        if (file_exists("/opt/webfs/init_done")) {
+            // already transferred from src to dst, exit
+            return;
+        }
     }
 
     // doc root does not exists for the required package version
@@ -197,6 +199,10 @@ static void create_root_doc_if_required(void) {
     system("rm -rf /mnt/UDISK/webfs");
     // copy the new one
     system("cp -rf /opt/webfs /mnt/UDISK");
+    // mark it as done
+    if (!file_exists("/opt/webfs/init_done")) {
+        system("touch /opt/webfs/init_done");
+    }
     return;
 }
 

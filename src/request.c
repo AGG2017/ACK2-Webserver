@@ -445,7 +445,7 @@ int probe_count_y = 0;
 int x_count = 0;
 int y_count = 0;
 // web page grid size
-int web_page_grid_size = 0;
+int new_grid_size = 0;
 // bed temperature
 int bed_temp = 60;
 // used profile number
@@ -730,9 +730,6 @@ int read_mesh_from_printer_config(void) {
                     n = GRID[nn & 0xFF];
                     mesh_grid = n;
 
-                    if (web_page_grid_size == 0)
-                        web_page_grid_size = n;
-
                     mesh_matrix_export(mesh_values, mesh_grid);
 
                     result = 0;
@@ -1010,15 +1007,22 @@ char *leveling_template_callback(char key) {
     }
     if (key == 'Z') {
         // Z-offset
-        sprintf(static_template_buffer, "%+g", z_offset);
+        sprintf(static_template_buffer, " Z-offset: %+g mm, Grid size used: %d, Grid size next: %d ", z_offset, mesh_grid, probe_count_x);
         return static_template_buffer;
     }
     if (key == 'B') {
-        // web grid size
-        if (web_page_grid_size != 0) {
-            sprintf(static_template_buffer, "%d", web_page_grid_size);
+        // grid size
+        if (new_grid_size != 0) {
+            // new grid size was set
+            sprintf(static_template_buffer, "%d", new_grid_size);
         } else {
-            sprintf(static_template_buffer, "%d", probe_count_x);
+            if (mesh_grid != 0) {
+                // current leveling grid size exists
+                sprintf(static_template_buffer, "%d", mesh_grid);
+            } else {
+                // next leveling grid size
+                sprintf(static_template_buffer, "%d", probe_count_x);
+            }
         }
         return static_template_buffer;
     }
@@ -1537,14 +1541,14 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
                             write_config_file("/user/webfs/parameters.cfg", leveling_config);
                             response_code = 6;
                         }
-                        if (web_page_grid_size != grid_int) {
+                        if (new_grid_size != grid_int) {
                             // set the "probe_count : grid,grid"
                             const char *config_file;
                             if (!detect_printer_defaults(NULL, &config_file, NULL, NULL)) {
                                 char replacement_value[8];
                                 sprintf(replacement_value, "%d,%d", grid_int, grid_int);
                                 update_printer_config_file(config_file, "probe_count", replacement_value);
-                                web_page_grid_size = grid_int;
+                                new_grid_size = grid_int;
                                 error_code = 6;
                                 response_code = 0;
                             } else {
