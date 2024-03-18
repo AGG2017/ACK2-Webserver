@@ -395,14 +395,14 @@ int detect_printer_defaults(const char **printer_model, const char **cfg_path, c
         grid = 5;
     } else {
         if (file_lenght(k2plus_path) > 0) {
-            k2_file = k2pro_file;
-            k2_path = k2pro_path;
+            k2_file = k2plus_file;
+            k2_path = k2plus_path;
             model_name = "K2Plus";
             grid = 7;
         } else {
             if (file_lenght(k2max_path) > 0) {
-                k2_file = k2pro_file;
-                k2_path = k2pro_path;
+                k2_file = k2max_file;
+                k2_path = k2max_path;
                 model_name = "K2Max";
                 grid = 7;
             }
