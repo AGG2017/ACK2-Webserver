@@ -39,36 +39,38 @@
         </div>
         <div id="content">
           <h1>Log Viewer</h1>
+          <button onclick="scrollToBottom()">Go Down</button><br /><br />
           <pre id="logContent"></pre>
-
-          <script>
-            // Fetch the content of the log file
-            fetch("/files/log")
-              .then((response) => {
-                // Check if the response is successful
-                if (!response.ok) {
-                  throw new Error("Failed to fetch log file");
-                }
-                // Return the response text
-                return response.text();
-              })
-              .then((data) => {
-                // Display the content of the log file in the pre element
-                document.getElementById("logContent").textContent = data;
-              })
-              .catch((error) => {
-                // Display any errors that occur during the fetch operation
-                console.error("Error fetching log file:", error);
-              });
-          </script>
         </div>
-      </div>
-      <div id="footer">
-        The Custom Webserver was created and it is maintained by AGG2017 and
-        other team members.
       </div>
     </div>
     <script>
+      fetch("/files/log")
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch log file");
+          }
+          return response.text();
+        })
+        .then((data) => {
+          const logContent = document.getElementById("logContent");
+          logContent.innerHTML = data.replace(
+            /\b(error)\b/gi,
+            '<span style="color:red; text-transform: uppercase;">ERROR</span>'
+          );
+        })
+        .catch((error) => {
+          console.error("Error fetching log file:", error);
+        });
+
+      function scrollToTop() {
+        window.scrollTo(0, 0);
+      }
+
+      function scrollToBottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         function fetchData() {
           fetch("/api/webserver.json")
@@ -82,5 +84,6 @@
         fetchData();
       });
     </script>
+    <br /><button onclick="scrollToTop()">Go Up</button>
   </body>
 </html>
