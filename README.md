@@ -45,3 +45,17 @@ The web page for the Kobra Unleashed interface requires the Kobra Unleashed http
 How to build Kobra Unleashed MQTT server with web interface on a Raspberry Pi 4 or 5 can be found [here](https://github.com/AGG2017/kobra-unleashed).
 
 Information how to create custom updates can be found in [this repository](https://github.com/ultimateshadsform/Anycubic-Kobra-2-Series-Tools)
+
+### Demo Screenshots from the Custom WebServer
+
+![](https://raw.githubusercontent.com/AGG2017/ACK2-Webserver/master/images/screenshot1.png)
+
+![](https://raw.githubusercontent.com/AGG2017/ACK2-Webserver/master/images/screenshot2.png)
+
+![](https://raw.githubusercontent.com/AGG2017/ACK2-Webserver/master/images/screenshot3.png)
+
+![](https://raw.githubusercontent.com/AGG2017/ACK2-Webserver/master/images/screenshot4.png)
+
+![](https://raw.githubusercontent.com/AGG2017/ACK2-Webserver/master/images/screenshot5.png)
+
+![](https://raw.githubusercontent.com/AGG2017/ACK2-Webserver/master/images/screenshot6.png)
