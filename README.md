@@ -2,7 +2,7 @@
 
 This repository contains the source code and the tools needed to build a custom webserver package for Anycubic Kobra 2 Series 3D printers.
 
-The result file `webserver/webserver.zip` can be used as a package for the option `webserver` which is a part of the options available for the `Custom Updates` project for these AC K2 printers.
+The result file `webserver/webserver.zip` can be used as a package for the option `webserver` which is a part of the options available for the `Custom Updates` project for these AC K2 printers. For more information fow to use this package to create a custom update please refer to the information provided in [this repository](https://github.com/ultimateshadsform/Anycubic-Kobra-2-Series-Tools).
 
 This version of the webserver was done based on the great work from these two projects:
 
