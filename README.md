@@ -27,3 +27,13 @@ After installing the tools, building the package can be done by executing the sc
 **src** - Contains the source code for the custom webserver.
 
 **webserver** - Contains the web pages and other resources to be packed in the result archive file `webserver.zip`
+
+### Additional Information
+
+The webcam web page requires a web camera connected to any USB slot with support for mpeg or raw YUYV video format of 640x480.
+
+The web page for the Kobra Unleashed interface requires the Kobra Unleashed http server URL to be set in advance inside the file webserver.json
+
+How to build Kobra Unleashed MQTT server with web interface on a Raspberry Pi 4 or 5 can be found [here](https://github.com/AGG2017/kobra-unleashed).
+
+Information how to create custom updates can be found in [this repository](https://github.com/ultimateshadsform/Anycubic-Kobra-2-Series-Tools)
