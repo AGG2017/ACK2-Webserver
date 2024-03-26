@@ -812,6 +812,10 @@ int control_api(config_option_t query) {
         system_with_output("reboot", 1);
         result = 1;
     }
+    if (!strcmp(action, "log_clear")) {
+        system("cat /dev/null > /mnt/UDISK/log");
+        result = 1;
+    }
     if (!strcmp(action, "ssh_start")) {
         int ssh = get_ssh_status();
         result = 0;
@@ -1348,10 +1352,17 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
             // unknown action
             error_code = 99;
         }
+
         if (!strcmp(action, "reboot")) {
             // reboot
             system("sync && reboot &");
             response_code = 1;
+        }
+
+        if (!strcmp(action, "log_clear")) {
+            // log clear
+            system("cat /dev/null > /mnt/UDISK/log");
+            response_code = 8;
         }
 
         if (!strcmp(action, "ssh_status")) {

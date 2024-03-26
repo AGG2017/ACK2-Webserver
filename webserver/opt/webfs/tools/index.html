@@ -93,13 +93,6 @@
   <span><br>Note: Setting a new profile requires to reboot the printer!</span>
   </fieldset>
 </form>
-<form action="response.html" method="get" name="reboot" >
-  <fieldset>
-  <span><b>REBOOT THE PRINTER:</b></span>
-  <input type="hidden" name="action" value="reboot">
-  <input type="submit" value="REBOOT">
-  </fieldset>
-</form>
 <form action="response.html" method="get" name="ssh_start" style="display: inline-block;">
   <fieldset>
     <span><b>SSH:</b></span>
@@ -121,7 +114,20 @@
     <input type="submit" value="STATUS">
   </fieldset>
 </form>
-
+<form action="response.html" method="get" name="log_clear" style="display: inline-block;">
+  <fieldset>
+  <span><b>LOG:</b></span>
+  <input type="hidden" name="action" value="log_clear">
+  <input type="submit" value="CLEAR">
+  </fieldset>
+</form>
+<form action="response.html" method="get" name="reboot" style="display: inline-block;">
+  <fieldset>
+  <span><b>PRINTER:</b></span>
+  <input type="hidden" name="action" value="reboot">
+  <input type="submit" value="REBOOT">
+  </fieldset>
+</form>
 <form action="/mesh/index.html" method="get" name="config" >
 <fieldset>
 <p>Current Mesh Data ({Z}):</p>
