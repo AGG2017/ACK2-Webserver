@@ -1,129 +1,222 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
-<head>
-  <title>AK2 Custom webserver</title>
-  <link rel="stylesheet" type="text/css" href="/style/style.css" title="style" />
-  <link rel="icon" type="image/png" href="/favicon.png">
-</head>
-<body>
-  <div id="main">
-    <div id="header">
-      <div id="logo">
-        <div id="logo_text">
-          <h1><a href="index.html">AK2<span class="logo_colour"> Custom Webserver</span></a></h1>
+  <head>
+    <title>AK2 Custom webserver</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/style/style.css"
+      title="style"
+    />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
+  <body>
+    <div id="main">
+      <div id="header">
+        <div id="logo">
+          <div id="logo_text">
+            <h1>
+              <a href="index.html"
+                >AK2<span class="logo_colour"> Custom Webserver</span></a
+              >
+            </h1>
+          </div>
+        </div>
+        <div id="menubar">
+          <ul id="menu">
+            <li class="selected"><a href="/index.html">Home</a></li>
+            <li><a id="unleashedLink" href="#">Kobra Unleashed</a></li>
+            <li><a href="/webcam/index.html">Webcam</a></li>
+            <li><a href="/tools/index.html">Tools</a></li>
+            <li><a href="/mesh/index.html">Mesh visualizer</a></li>
+            <li><a href="/files">Files</a></li>
+          </ul>
         </div>
       </div>
-      <div id="menubar">
-        <ul id="menu">
-          <li class="selected"><a href="/index.html">Home</a></li>
-		      <li><a id="unleashedLink" href="#">Kobra Unleashed</a></li>
-          <li><a href="/webcam/index.html">Webcam</a></li>
-          <li><a href="/tools/index.html">Leveling tools</a></li>
-          <li><a href="/mesh/index.html">Mesh visualizer</a></li>
-		  <li><a href="/files">Files</a></li>
-        </ul>
+      <div id="site_content">
+        <div class="sidebar">
+          <p></p>
+          <div class="table-container">
+            <table>
+              <tbody>
+                <tr>
+                  <td colspan="2">
+                    <strong
+                      ><span style="font-size: 1.2em"
+                        >Printer status:</span
+                      ></strong
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Total Memory:</strong></td>
+                  <td><span id="totalMemory"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>Free Memory:</strong></td>
+                  <td><span id="freeMemory"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>Free Memory:</strong></td>
+                  <td><span id="freeMemoryPercentage"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>CPU Total Usage:</strong></td>
+                  <td><span id="cpuTotalUsage"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>CPU User Usage:</strong></td>
+                  <td><span id="cpuUserUsage"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>CPU System Usage:</strong></td>
+                  <td><span id="cpuSystemUsage"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>CPU Idle:</strong></td>
+                  <td><span id="cpuIdle"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>Model:</strong></td>
+                  <td><span id="printerModel"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>Firmware version:</strong></td>
+                  <td><span id="fwVersion"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>SSH Status:</strong></td>
+                  <td><span id="sshStatus"></span></td>
+                </tr>
+                <tr>
+                  <td><strong>Sytem Uptime:</strong></td>
+                  <td><span id="uptime"></span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <a href="/logviewer/index.html" class="iconized-link">
+              <img
+                src="assets/log.png"
+                width="20"
+                height="20"
+                border="0"
+                alt=""
+              />
+              <span class="icon">Printer Log</span>
+            </a>
+            <p></p>
+            <a href="/documentation/index.html" class="iconized-link">
+              <img
+                src="assets/docum.png"
+                width="25"
+                height="25"
+                border="0"
+                alt=""
+              />
+              <span class="icon">Documentation</span>
+            </a>
+          </div>
+        </div>
+        <div id="content">
+          <h1>About this project</h1>
+          <p>
+            The closed-source nature of these 3D printers imposes limitations on
+            end users, confining them to the functionalities predetermined by
+            software designers and dictated by the manufacturer.<br />
+            This lack of flexibility stifles innovation and prevents users from
+            implementing their own ideas for product enhancements. Recognizing
+            these limitations, we set out to address these gaps with this Custom
+            Webserver solution.
+            <br />
+            The Custom Webserver offers additional features unavailable in the
+            stock firmware.<br />
+            Among these enhancements you'll find advanced bed mesh leveling
+            tools, 3D bed mesh visualization capabilities, mesh leveling
+            profiles, custom level temperature, custom grid empowering users
+            with greater control over their printing processes.<br />
+            Furthermore, we've integrated essential printer information,
+            including alternative cloud solutions that enable remote printing,
+            file upload, printer status monitoring, and more, alongside CPU
+            usage, free memory, SSH status, printer log access, and additional
+            features, directly into the interface.<br />
+            <br />
+            Designed for optimal performance, the Webserver operates with
+            remarkable efficiency, utilizing system resources such as memory
+            with less than 1% utilization. CPU load remains minimal, only
+            spiking during web page requests, ensuring a seamless user
+            experience. This project has demanded a significant investment of
+            time and effort, and any help in contributing to the project will be
+            greatly appreciated.
+            <br />
+          </p>
+
+          <p>
+            <a
+              href="https://github.com/ultimateshadsform/Anycubic-Kobra-2-Series-Tools"
+              ><br /><br />AK2 Custom firmware and tools</a
+            >
+            <br /><a href="https://github.com/AGG2017/ACK2-Webserver"
+              >AK2 Custom webserver
+            </a>
+            <br /><a href="https://github.com/anjomro/kobra-unleashed"
+              >Kobra Unleashed original project</a
+            >
+            <br /><a href="https://github.com/AGG2017/kobra-unleashed"
+              >Kobra Unleashed updated fork</a
+            >
+          </p>
+        </div>
+      </div>
+      <div id="footer">
+        The Custom Webserver was created and it is maintained by AGG2017 and
+        other team members.
       </div>
     </div>
-    <div id="site_content">
-      <div class="sidebar">
-        <h3>Printer resources</h3>
-		<div class="table-container">
-  <table>
-    <tbody>
-      <tr>
-      </tr>
-      <tr>
-        <td><strong>Total Memory:</strong></td>
-        <td><span id="totalMemory"></span></td>
-      </tr>
-      <tr>
-        <td><strong>Free Memory:</strong></td>
-        <td><span id="freeMemory"></span></td>
-      </tr>
-      <tr>
-        <td><strong>Free Memory:</strong></td>
-        <td><span id="freeMemoryPercentage"></span></td>
-      </tr>
-      <tr>
-        <td><strong>CPU Total Usage:</strong></td>
-        <td><span id="cpuTotalUsage"></span></td>
-      </tr>
-      <tr>
-        <td><strong>CPU User Usage:</strong></td>
-        <td><span id="cpuUserUsage"></span></td>
-      </tr>
-      <tr>
-        <td><strong>CPU System Usage:</strong></td>
-        <td><span id="cpuSystemUsage"></span></td>
-      </tr>
-      <tr>
-        <td><strong>CPU Idle:</strong></td>
-        <td><span id="cpuIdle"></span></td>
-      </tr>
-    </tbody>
-  </table>
-  <table>
-  <tr>
-    <th>Printer Model</th>
-    <td id="printerModel"></td>
-  </tr>
-  <tr>
-    <th>Firmware Version</th>
-    <td id="fwVersion"></td>
-  </tr>
-  <tr>
-    <th>SSH Status</th>
-    <td><span id="sshStatus"></span></td>
-
-</table>
- <a href="/logviewer/index.html">View printer Log</a>
-
-</div>
-      </div>
-      <div id="content">
-        <h1>About this project</h1>
-       <p>The closed source 3D printers provide limited options for the end user restricted to the one the software designer has in his mind. No options are provided to add new functionalities or to modify the existing one. You cannot use your ideas for product improvements.
-
-We tried to fill these gaps in the developed Custom Webserver. The extra features added aren't many yet, but it's just the beginning. It is a highly optimized Webserver that uses system resources such as memory with less than 1%, and the CPU load is minimal and only when there are web page requests.</p><br>
-<br><h1>Help support this project</h1>
-
-It takes a lot of work to run this project. <br> We rely on the kind work of a couple of great volunteers. Any help will be greatly appreciated. <a href="https://github.com/AGG2017/ACK2-Webserver"><br><br>AK2 Custom webserver on GIT</a></p>
-      </div>
-    </div>
-    <div id="footer">
-             The Custom Webserver was created and it is maintained by AGG2017 and other team members.
-    </div>
-  </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        
-      fetch('/api/webserver.json')
-          .then(response => response.json())
-          .then(data => {
-            document.getElementById('printerModel').textContent = data.printer_model;
-            document.getElementById('fwVersion').textContent = data.update_version;
-            document.getElementById('unleashedLink').href = data.mqtt_webui_url;
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/webserver.json")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("printerModel").textContent =
+              data.printer_model;
+            document.getElementById("fwVersion").textContent =
+              data.update_version;
+            document.getElementById("unleashedLink").href = data.mqtt_webui_url;
           })
-          .catch(error => console.error('Error fetching data:', error));
-    
-      function fetchData() {
-        fetch('/api/info.json')
-          .then(response => response.json())
-          .then(data => {
-            document.getElementById('totalMemory').textContent = Math.round(data.total_mem / 1024 / 1024) + 'MB';                                                
-            document.getElementById('freeMemory').textContent = Math.round(data.free_mem / 1024 / 1024) + 'MB';                                                  
-            document.getElementById('freeMemoryPercentage').textContent = data.free_mem_per + '%';                                                               
-            document.getElementById('cpuTotalUsage').textContent = data.cpu_use + '%';                                                                           
-            document.getElementById('cpuUserUsage').textContent = data.cpu_usr_use + '%';                                                                        
-            document.getElementById('cpuSystemUsage').textContent = data.cpu_sys_use + '%';                                                                      
-            document.getElementById('cpuIdle').textContent = data.cpu_idle + '%';                                                                                
-            document.getElementById('sshStatus').textContent = (data.ssh_status==2) ? 'Started' : ((data.ssh_status==1) ? 'Stopped' : 'N/A');   
-          })
-          .catch(error => console.error('Error fetching data:', error));
-      }
-      fetchData();
-      setInterval(fetchData, 1000);
-    });
+          .catch((error) => console.error("Error fetching data:", error));
+
+        function fetchData() {
+          fetch("/api/info.json")
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("totalMemory").textContent =
+                Math.round(data.total_mem / 1024 / 1024) + "MB";
+              document.getElementById("freeMemory").textContent =
+                Math.round(data.free_mem / 1024 / 1024) + "MB";
+              document.getElementById("freeMemoryPercentage").textContent =
+                data.free_mem_per + "%";
+              document.getElementById("cpuTotalUsage").textContent =
+                data.cpu_use + "%";
+              document.getElementById("cpuUserUsage").textContent =
+                data.cpu_usr_use + "%";
+              document.getElementById("cpuSystemUsage").textContent =
+                data.cpu_sys_use + "%";
+              document.getElementById("cpuIdle").textContent =
+                data.cpu_idle + "%";
+              document.getElementById("sshStatus").textContent =
+                data.ssh_status == 2
+                  ? "Started"
+                  : data.ssh_status == 1
+                  ? "Stopped"
+                  : "N/A";
+              document.getElementById("uptime").textContent = data.uptime;
+            })
+            .catch((error) => console.error("Error fetching data:", error));
+        }
+        fetchData();
+        setInterval(fetchData, 1000);
+      });
     </script>
-</body>
+  </body>
 </html>

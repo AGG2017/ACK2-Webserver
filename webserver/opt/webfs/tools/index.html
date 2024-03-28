@@ -1,153 +1,331 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
-<head>
-  <title>AK2 Custom webserver</title>
-  <link rel="stylesheet" type="text/css" href="/style/style.css" title="style" />
-  <link rel="icon" type="image/png" href="/favicon.png">
-</head>
-<body>
-  <div id="main">
-    <div id="header">
-      <div id="logo">
-        <div id="logo_text">
-          <h1><a href="index.html">AK2<span class="logo_colour"> Custom Webserver</span></a></h1>
+  <head>
+    <title>AK2 Custom webserver</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/style/style.css"
+      title="style"
+    />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
+  <body>
+    <div id="main">
+      <div id="header">
+        <div id="logo">
+          <div id="logo_text">
+            <h1>
+              <a href="index.html"
+                >AK2<span class="logo_colour"> Custom Webserver</span></a
+              >
+            </h1>
+          </div>
+        </div>
+        <div id="menubar">
+          <ul id="menu">
+            <li><a href="/index.html">Home</a></li>
+            <li><a id="unleashedLink" href="#">Kobra Unleashed</a></li>
+            <li><a href="/webcam/index.html">Webcam</a></li>
+            <li class="selected">
+              <a href="/tools/index.html">Leveling tools</a>
+            </li>
+            <li><a href="/mesh/index.html">Mesh visualizer</a></li>
+            <li><a href="/files">Files</a></li>
+          </ul>
         </div>
       </div>
-      <div id="menubar">
-        <ul id="menu">
-          <li><a href="/index.html">Home</a></li>
-		      <li><a id="unleashedLink" href="#">Kobra Unleashed</a></li>
-          <li><a href="/webcam/index.html">Webcam</a></li>
-          <li class="selected"><a href="/tools/index.html">Leveling tools</a></li>
-          <li><a href="/mesh/index.html">Mesh visualizer</a></li>
-		      <li><a href="/files">Files</a></li>
-        </ul>
+      <div id="site_content">
+        <!-- Sys tools -->
+        <p></p>
+        <div class="fieldset-label">
+          <strong>
+            <img
+              src="/assets/systools.png"
+              width="20"
+              height="18"
+              border="0"
+              alt=""
+            />&nbsp;&nbsp;SYSTEM TOOLS:</strong
+          >
+        </div>
+        <p></p>
+        <form
+          action="response.html"
+          method="get"
+          name="ssh_start"
+          style="display: inline-block"
+        ></form>
+
+        <form
+          action="response.html"
+          method="get"
+          name="ssh_start"
+          style="display: inline-block"
+        >
+          <fieldset>
+            <input type="hidden" name="action" value="ssh_start" />
+            <input type="submit" value="Start SSH" />
+          </fieldset>
+        </form>
+
+        <form
+          action="response.html"
+          method="get"
+          name="ssh_stop"
+          style="display: inline-block"
+        >
+          <fieldset>
+            <input type="hidden" name="action" value="ssh_stop" />
+            <input type="submit" value="Stop SSH" />
+          </fieldset>
+        </form>
+
+        <form
+          action="response.html"
+          method="get"
+          name="ssh_status"
+          style="display: inline-block"
+        >
+          <fieldset>
+            <input type="hidden" name="action" value="ssh_status" />
+            <input type="submit" value="SSH Status" />
+          </fieldset>
+        </form>
+
+        <form
+          action="response.html"
+          method="get"
+          name="log_clear"
+          style="display: inline-block"
+        >
+          <fieldset>
+            <input type="hidden" name="action" value="log_clear" />
+            <input type="submit" value="Clear printer log" />
+          </fieldset>
+        </form>
+
+        <form
+          action="response.html"
+          method="get"
+          name="reboot"
+          style="display: inline-block"
+        >
+          <fieldset>
+            <input type="hidden" name="action" value="reboot" />
+            <input type="submit" value="Reboot printer" />
+          </fieldset>
+        </form>
+
+        <p></p>
+        <div class="fieldset-label">
+          <strong>
+            <img
+              src="/assets/param.png"
+              width="17"
+              height="18"
+              border="0"
+              alt=""
+            />&nbsp;&nbsp;MESH PARAMETERS:</strong
+          >
+        </div>
+        <p></p>
+        <form action="response.html" method="get" name="set_parameters">
+          <fieldset>
+            <span>Average Precision: </span
+            ><input
+              type="number"
+              name="precision"
+              size="7"
+              value="{A}"
+              step="0.0001"
+              min="0.0001"
+              max="0.1"
+            />
+            <span>Grid Size (2-10): </span
+            ><input
+              type="number"
+              name="grid"
+              size="3"
+              value="{B}"
+              min="2"
+              max="10"
+            />
+            <span>Bed Temp (0-90): </span
+            ><input
+              type="number"
+              name="bed_temp"
+              size="3"
+              value="{T}"
+              min="0"
+              max="90"
+            />
+            <input type="hidden" name="action" value="set_parameters" />
+            <input type="submit" value="Update" /><br /><br />
+            <span
+              ><strong
+                >NOTE: Changing the 'Grid Size' or 'Bed Temp' requires to reboot
+                the printer!</strong
+              >&nbsp;Please read the
+              <a href="/documentation/index.html">documentation</a> before
+              changing these values</span
+            >
+          </fieldset>
+        </form>
+
+        <!-- Printer config -->
+        <p></p>
+        <div class="fieldset-label">
+          <strong
+            ><img
+              src="/assets/printer.png"
+              width="18"
+              height="20"
+              border="0"
+              alt=""
+            />&nbsp;&nbsp;PRINTER CONFIGURATION TOOLS:</strong
+          >
+        </div>
+        <p></p>
+        <form action="response.html" method="get" name="save_mesh">
+          <fieldset>
+            <span><b>SAVE THE CURRENT MESH IN A DATA SLOT:</b></span>
+            <span>Next Free Data Slot (0-99): </span
+            ><input
+              type="number"
+              name="selected_slot"
+              size="3"
+              value="{C}"
+              min="0"
+              max="99"
+            />
+            <input type="hidden" name="action" value="save_mesh" />
+            <input type="submit" value="Save current mesh" />
+          </fieldset>
+        </form>
+        <form action="/mesh/index.html" method="get" name="slot3d">
+          <fieldset>
+            <span><b>3D VISUALIZATION OF SELECTED DATA SLOT:</b></span>
+            <span>Select Data Slot (1-99): </span
+            ><input
+              type="number"
+              name="source"
+              size="3"
+              value=""
+              min="1"
+              max="99"
+            />
+            <input type="submit" value="Visualize this slot" />
+          </fieldset>
+        </form>
+        <form action="response.html" method="get" name="set_average">
+          <fieldset>
+            <span><b>SET THE AVERAGE MESH AS CURRENT MESH:</b></span>
+            <input type="hidden" name="action" value="set_average" />
+            <input type="submit" value="Set mesh average data" />
+            <br /><br /><span
+              >NOTE: Setting a new mesh requires to reboot the printer!</span
+            >
+          </fieldset>
+        </form>
+
+        <form action="response.html" method="get" name="clear_slot">
+          <fieldset>
+            <span><b>CLEAR SELECTED LEVELING DATA SLOT:</b></span>
+            <span>Data Slot (1-99): </span
+            ><input
+              type="number"
+              name="data_slot"
+              size="3"
+              value="{D}"
+              min="1"
+              max="99"
+            />
+            <input type="hidden" name="action" value="clear_slot" />
+            <input type="submit" value="Clear this slot" />
+          </fieldset>
+        </form>
+        <form action="response.html" method="get" name="clear_all">
+          <fieldset>
+            <span><b>CLEAR ALL LEVELING DATA SLOTS:</b></span>
+            <input type="hidden" name="action" value="clear_all" />
+            <input type="submit" value="Clear all slots" />
+          </fieldset>
+        </form>
+        <form action="response.html" method="get" name="save_profile">
+          <fieldset>
+            <span><b>SAVE CURRENT CONFIGURATION AS A PROFILE:</b></span>
+            <span>Profile number (1-9): </span
+            ><input
+              type="number"
+              name="profile"
+              size="3"
+              value="{G}"
+              min="1"
+              max="9"
+            />
+            <input type="hidden" name="action" value="save_profile" />
+            <input type="submit" value="Save as profile" />
+          </fieldset>
+        </form>
+        <form action="response.html" method="get" name="use_profile">
+          <fieldset>
+            <span><b>USE A PROFILE AS CURRENT CONFIGURATION:</b></span>
+            <span>Profile number (1-9): </span
+            ><input
+              type="number"
+              name="profile"
+              size="3"
+              value="{H}"
+              min="1"
+              max="9"
+            />
+            <input type="hidden" name="action" value="use_profile" />
+            <input type="submit" value="Use this profile" />
+            <br /><span
+              ><br /><strong
+                >NOTE: Setting a new profile requires to reboot the
+                printer!</strong
+              ></span
+            >
+          </fieldset>
+        </form>
+
+        <form action="/mesh/index.html" method="get" name="config">
+          <fieldset>
+            <p><strong>Current Mesh Data ({Z}):</strong></p>
+            <textarea
+              style="font-family: monospace; overflow: auto; width: 100%"
+              cols="200"
+              rows="5"
+              wrap="off"
+            >
+{E}</textarea
+            >
+            <input type="hidden" name="source" value="config" />
+            <input type="submit" value="Current 3D mesh visualizer" />
+          </fieldset>
+        </form>
+        <form action="/mesh/index.html" method="get" name="average">
+          <fieldset>
+            <p><strong>Average Mesh Data (based on {X} data slots):</strong></p>
+            <textarea
+              style="font-family: monospace; overflow: auto; width: 100%"
+              cols="200"
+              rows="5"
+              wrap="off"
+            >
+{F}</textarea
+            >
+            <input type="hidden" name="source" value="average" />
+            <input type="submit" value="Average 3D mesh visualizer" />
+          </fieldset>
+        </form>
       </div>
     </div>
-    <div id="site_content">
-	<h2>Mesh leveling tools</h2>
-       <form action="response.html" method="get" name="set_parameters" >
-  <fieldset>
- 
-  <span><b>SELECT PARAMETERS:</b></span></span></span>
-  <span>Average Precision: </span><input type="number" name="precision" size="7" value="{A}" step="0.0001" min="0.0001" max="0.1" />
-  <span>Grid Size (2-10): </span><input type="number" name="grid" size="3" value="{B}" min="2" max="10" />
-  <span>Bed Temp (0-90): </span><input type="number" name="bed_temp" size="3" value="{T}" min="0" max="90" />
-  <input type="hidden" name="action" value="set_parameters">
-  <input type="submit" value="UPDATE">
-  <span>Note: Changing the 'Grid Size' or 'Bed Temp' requires to reboot the printer!</span>
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="save_mesh" >
-  <fieldset>
-  <span><b>SAVE THE CURRENT MESH IN A DATA SLOT:</b></span>
-  <span>Next Free Data Slot (0-99): </span><input type="number" name="selected_slot" size="3" value="{C}" min="0" max="99" />
-  <input type="hidden" name="action" value="save_mesh">
-  <input type="submit" value="SAVE CURRENT MESH">
-  </fieldset>
-</form>
-<form action="/mesh/index.html" method="get" name="slot3d" >
-<fieldset>
-<span><b>3D VISUALIZATION OF SELECTED DATA SLOT:</b></span>
-<span>Select Data Slot (1-99): </span><input type="number" name="source" size="3" value="" min="1" max="99" />	
-<input type="submit" value="3D VISUALIZATION">
-</fieldset>
-</form>
-<form action="response.html" method="get" name="set_average" >
-  <fieldset>
-  <span><b>SET THE AVERAGE MESH AS CURRENT MESH:</b></span>
-  <input type="hidden" name="action" value="set_average">
-  <input type="submit" value="SET THE AVERAGE MESH">
-  <span>Note: Setting a new mesh requires to reboot the printer!</span>
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="clear_slot" >
-  <fieldset>
-  <span><b>CLEAR SELECTED LEVELING DATA SLOT:</b></span>
-  <span>Data Slot (1-99): </span><input type="number" name="data_slot" size="3" value="{D}" min="1" max="99" />
-  <input type="hidden" name="action" value="clear_slot">
-  <input type="submit" value="CLEAR THIS SLOT">
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="clear_all" >
-  <fieldset>
-  <span><b>CLEAR ALL LEVELING DATA SLOTS:</b></span>
-  <input type="hidden" name="action" value="clear_all">
-  <input type="submit" value="CLEAR ALL SLOTS">
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="save_profile" >
-  <fieldset>
-  <span><b>SAVE CURRENT CONFIGURATION AS A PROFILE:</b></span>
-  <span>Profile number (1-9): </span><input type="number" name="profile" size="3" value="{G}" min="1" max="9" />
-  <input type="hidden" name="action" value="save_profile">
-  <input type="submit" value="SAVE AS PROFILE">
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="use_profile" >
-  <fieldset>
-  <span><b>USE A PROFILE AS CURRENT CONFIGURATION:</b></span>
-  <span>Profile number (1-9): </span><input type="number" name="profile" size="3" value="{H}" min="1" max="9" />
-  <input type="hidden" name="action" value="use_profile">
-  <input type="submit" value="USE THIS PROFILE">
-  <span><br>Note: Setting a new profile requires to reboot the printer!</span>
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="ssh_start" style="display: inline-block;">
-  <fieldset>
-    <span><b>SSH:</b></span>
-    <input type="hidden" name="action" value="ssh_start">
-    <input type="submit" value="START">
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="ssh_stop" style="display: inline-block;">
-  <fieldset>
-    <span><b>SSH:</b></span>
-    <input type="hidden" name="action" value="ssh_stop">
-    <input type="submit" value="STOP">
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="ssh_status" style="display: inline-block;">
-  <fieldset>
-    <span><b>SSH:</b></span>
-    <input type="hidden" name="action" value="ssh_status">
-    <input type="submit" value="STATUS">
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="log_clear" style="display: inline-block;">
-  <fieldset>
-  <span><b>LOG:</b></span>
-  <input type="hidden" name="action" value="log_clear">
-  <input type="submit" value="CLEAR">
-  </fieldset>
-</form>
-<form action="response.html" method="get" name="reboot" style="display: inline-block;">
-  <fieldset>
-  <span><b>PRINTER:</b></span>
-  <input type="hidden" name="action" value="reboot">
-  <input type="submit" value="REBOOT">
-  </fieldset>
-</form>
-<form action="/mesh/index.html" method="get" name="config" >
-<fieldset>
-<p>Current Mesh Data ({Z}):</p>
-<textarea style="font-family: monospace; overflow: auto; width:100%;" cols="200" rows="5" wrap="off">{E}</textarea>
-<input type="hidden" name="source" value="config">                                                                  
-<input type="submit" value="3D VISUALIZATION">                                                                       
-</fieldset>
-</form> 
-<form action="/mesh/index.html" method="get" name="average" >
-<fieldset>
-<p>Average Mesh Data (based on {X} data slots):</p>
-<textarea style="font-family: monospace; overflow: auto; width:100%;" cols="200" rows="5" wrap="off">{F}</textarea>
-<input type="hidden" name="source" value="average">
-<input type="submit" value="3D VISUALIZATION">
-</fieldset>
-</form>
-    </div>
-    </div>
     <div id="footer">
-             The Custom Webserver was created and it is maintained by AGG2017 and other team members.
+      The Custom Webserver was created and it is maintained by AGG2017 and other
+      team members.
     </div>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -163,5 +341,5 @@
         fetchData();
       });
     </script>
-</body>
+  </body>
 </html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AK2 Custom webserver</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/style/style.css"
+      title="style"
+    />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
+  <body>
+    <div id="main">
+      <div id="header">
+        <div id="logo">
+          <div id="logo_text">
+            <h1>
+              <a href="/index.html"
+                >AK2<span class="logo_colour"> Custom Webserver</span></a
+              >
+            </h1>
+          </div>
+        </div>
+        <div id="menubar">
+          <ul id="menu">
+            <li class="selected"><a href="/index.html">Home</a></li>
+            <li><a id="unleashedLink" href="#">Kobra Unleashed</a></li>
+            <li><a href="/webcam/index.html">Webcam</a></li>
+            <li><a href="/tools/index.html">Tools</a></li>
+            <li><a href="/mesh/index.html">Mesh visualizer</a></li>
+            <li><a href="/files/">Files</a></li>
+          </ul>
+        </div>
+      </div>
+      <div id="site_content">
+        <div class="sidebar">
+          <div class="table-container"></div>
+        </div>
+        <div id="content">
+          <h2>Web server documentation:</h2>
+          <p>
+            As mentioned on the main page of this web application, the
+            closed-source stock firmware imposes limitations on end-users,
+            confining them to the functionalities predetermined by software
+            designers and dictated by the manufacturer. We have developed some
+            tools to overcome these limitations, and on this page, we explain
+            why and how to use them.
+          </p>
+
+          <h3>Main page:</h3>
+          <p>
+            A simple project presentation along with a handy table containing
+            the printer status information, these include useful information
+            about the printer and links to useful sources.
+          </p>
+
+          <h3>Kobra Unleashed:</h3>
+          <p>
+            Please be aware that this web server does not install Kobra
+            Unleashed. This link is meant to be used only if you have installed
+            Kobra Unleashed to have a direct link to it. As you have probably
+            noticed, the link points to http://192.168.1.234:5000, which is a
+            dummy URL.<br />
+            You can customize this link to point to your own Kobra Unleashed
+            server by editing the file named webserver.json that can be found
+            inside the folder /mnt/UDISK/webfs/api.
+          </p>
+
+          <pre>
+{ "printer_model": "K2Pro", "update_version": "3.1.0", "mqtt_webui_url": "http://192.168.1.234:5000" --- replace with your server IP and port } 
+You don't need to edit the first two parameters as they are fetched automatically.</pre
+          >
+
+          <h3>Web camera:</h3>
+          <p>
+            With the webcam function, it is possible to see real-time image
+            streaming from the attached camera directly on the web server page.
+            Much effort has been made to support as many webcams as possible;
+            however, we cannot guarantee that any camera will work. Pay
+            attention because the streaming is not a video, it is a live image
+            refreshed every second.
+          </p>
+
+          <h3>Tools and mesh calibration advanced settings:</h3>
+          <p>
+            There you will find useful tools crafted to overcome stock firmware
+            missing functions, including some useful commands like checking the
+            SSH status, stopping or starting it, rebooting the printer, and
+            clearing the printer log which naturally encrypted in the
+            closed-source firmware. (A link for a readable printer log can be
+            found on the home page). <br />
+            Since the mesh leveling mechanism and the hardware have some
+            limitations, it does not yield consistent results, resulting in an
+            inaccurate bed mesh. <br />
+            Therefore, an averaging system has been developed. What does this
+            mean? When you run the auto-level from your printer, the results are
+            not consistent. For example, one probe point is measured as -0.09,
+            and the same point at the next leveling is measured as -0.06. You
+            can figure out by yourself that this data is not even near to being
+            useful; it is exactly here that the averaging mechanism enters. You
+            have the ability to save the grabbed data from the ABL sensor into
+            what we call a slot (which is a simple text file). A maximum of 99
+            slots can be saved. When you auto-level a function, it understands
+            that new data is present and offers you the opportunity to save the
+            current data as a slot.<br />
+            The numbering is automatic; you don't have to input any number, just
+            click and save the slot. <br />
+            Every time you save a slot, the function recalculates the best
+            possible mesh data by considering all the saved slots, the result is
+            displayed at the bottom of the page and can be 3D visualized by
+            clicking the button. It might seem difficult to understand, but in
+            practice, this system is very simple and can really make a
+            difference to obtain a consistent first layer. Remember that to
+            apply the average mesh data to your printer.cfg, you have to press
+            the button "Set mesh average data" and then you will need to reboot
+            the printer for changes to be applied, there is a button for
+            rebooting the printer without needing to switch off the physical
+            button. You can visualize a specific slot number in a 3D plot just
+            by typing the slot number and then click visualize. <br />
+            Naturally, 3D visualization is also available for your current mesh
+            (the one stored inside printer.cfg) data and also for the average
+            mesh data. This is extremely useful to compare the differences
+            between the grabbed data and "refined and averaged data". Again,
+            remember that to apply the average mesh you need to click the
+            dedicated button and reboot the printer; at this point, you will
+            notice that the "current mesh data and average mesh" are exactly the
+            same, confirming the average data has been written in printer.cfg
+            and will be used during printing.<br />
+            The computation behind this algorithm is simple yet effective.
+            <br />
+            The sum of all corresponding points from the same grid size is
+            divided by the number of slots used, resulting in an averaging of
+            all the grabbed data saved inside the slots. Remember that even if
+            the system allows you to save 99 slots, this does not mean that you
+            need to use all of them; 5 or 6 slots should suffice to obtain
+            optimal results but if you keep leveling the algorithm will
+            calculate the average based on all slot available. It is also
+            possible to set the precision of the averaging of the results of
+            sum/slots after the decimal point. <br />
+            Precision 0.01 means all results less than 0.005 will be rounded to
+            0.00, and results 0.005 to 0.0099999 will be rounded to 0.01. You
+            will need to play a little to find the best settings for you and for
+            your printer. You can choose the temperature for leveling and a
+            custom grid size (default probing points are 5x5 for K2Pro and 7x7
+            for Plus and Max). <br />
+            You can increase it to achieve even better results. A firmware
+            limitation will prevent you from increasing the grid size over 6x6
+            in K2 Pro version and 10 in Plus and Max. If you set a wrong size,
+            the mesh will be malformed, yielding bad results, we are still
+            working on this so we suggest to increase the grid only by one point
+            for now.
+          </p>
+
+          <h3>Profiles:</h3>
+          <p>
+            These are useful in many occasions. A simple example is what if you
+            use more than one plate? Plate 1 has a specific thickness and a
+            specific magnetic return sensed by the inductive sensor (The
+            orange-colored inductive probe). On the other hand, your plate
+            number 2 can have totally different characteristics like a different
+            thickness or a different inductive response. You probably already
+            know that metal expands when heated, a phenomenon known as thermal
+            expansion. That's something you cannot stop, and it is fine until
+            you print always the same material let's say PLA; you set the
+            leveling temperature at 60, and all will be good. But what will
+            happen if you heat the bed at a temperature of 80 degrees to print
+            PETG? <br />
+            The bed plate will deform in a different way, what if you use
+            another plate with a different electromagnetical response? Your PLA
+            mesh data taken at 60 degrees will not give you good results for
+            different material that require a different temperature or a
+            different plate. The function is very handy, just create a profile
+            for each material/plate/temperature you need. Actually, it is not
+            possible to name the profiles so keep a note of profile number and
+            for what it is optimized.
+          </p>
+
+          <h3>3D Visualizer:</h3>
+          <p>
+            Made using Plotly.js, a JavaScript library configured to visualize
+            3D printer bed mesh data, simple as that.
+          </p>
+
+          <h3>Files:</h3>
+          <p>This function lists some important files inside the printer.</p>
+
+          <h3>Conclusion:</h3>
+          <p>
+            This project is still a work in progress. Much effort has been made
+            into this, and we hope you will find these tools useful. We want to
+            underline that all modifications and add-ons including this
+            webserver are open source, and all the sources can be found in the
+            GIT repositories linked on the main page. For questions, bug
+            reporting, coding contributing, we have opened a telegram group
+            reachable from this link:
+            <a href="https://t.me/kobra2modding">https://t.me/kobra2modding</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
