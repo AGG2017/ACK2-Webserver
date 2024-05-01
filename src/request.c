@@ -822,6 +822,10 @@ int control_api(config_option_t query) {
         system_with_output("reboot", 1);
         result = 1;
     }
+    if (!strcmp(action, "poweroff")) {
+        system_with_output("poweroff", 1);
+        result = 1;
+    }
     if (!strcmp(action, "log_clear")) {
         system("cat /dev/null > /mnt/UDISK/log");
         result = 1;
@@ -856,7 +860,7 @@ char *leveling_template_callback(char key) {
     // response code replacement
     if (key == '@') {
         if (response_code == 1) {
-            static_template_ptr = "SUCCESS: The printer is preparing to reboot now...";
+            static_template_ptr = "SUCCESS: The printer is preparing to reboot now ...";
             return static_template_ptr;
         }
         if (response_code == 2) {
@@ -897,6 +901,10 @@ char *leveling_template_callback(char key) {
         if (response_code == 11) {
             sprintf(static_template_buffer, "SUCCESS: Selected bed mesh temperature %d C has been set!", bed_temp);
             return static_template_buffer;
+        }
+        if (response_code == 12) {
+            static_template_ptr = "SUCCESS: The printer is preparing to power off ...";
+            return static_template_ptr;
         }
 
         // default - no response shown
@@ -1367,6 +1375,12 @@ void process_custom_pages(char *filename_str, struct REQUEST *req) {
             // reboot
             system("sync && reboot &");
             response_code = 1;
+        }
+
+        if (!strcmp(action, "poweroff")) {
+            // power off
+            system("sync && poweroff &");
+            response_code = 12;
         }
 
         if (!strcmp(action, "log_clear")) {
